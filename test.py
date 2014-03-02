@@ -1,9 +1,12 @@
 
 import RainEagle
+from pprint import pprint
 
 
 eg = RainEagle.Eagle( debug=1 )
 
-eg.list_devices()
+r = eg.list_devices()
+pprint(r)
 
-eg.get_device_data("EE:24:01:05:50:23")
+r = eg.get_device_data("EE:24:01:05:50:23")
+pprint(r)
