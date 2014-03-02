@@ -2,6 +2,8 @@
 Python Class for utilizing the Rainforest Automation Eagle ( RFA-Z109 ) socket API
 
 
+ *** This is just skeleton so far ***
+
 
 Rainforest Automation Documentation
 -----------------------------------
