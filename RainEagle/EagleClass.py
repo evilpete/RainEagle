@@ -1,4 +1,9 @@
 
+
+__author__ = 'Peter Shipley <peter.shipley@gmail.com>'
+__copyright__ = "Copyright (C) 2014 Peter Shipley" 
+__license__ = "BSD"
+
 import socket
 import sys
 import os
@@ -58,7 +63,6 @@ def et2d(et) :
 
 
 #
-# Simple Base class for ISY Class
 class Eagle(object) :
     """
 	Class for talking to Rainforest Automation EAGLE (RFA-Z109)
