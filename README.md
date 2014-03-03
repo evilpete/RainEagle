@@ -2,7 +2,14 @@
 Python Class for utilizing the Rainforest Automation Eagle ( RFA-Z109 ) socket API
 
 
- *** This is just skeleton so far ***
+    import import RainEagle
+
+    raineagle = RainEagle.Eagle( debug=0 , addr="10.1.1.39")
+    ret_data = eg.list_devices()
+
+    print "device MacID = ", ret_data['DeviceInfo']['DeviceMacId']
+
+
 
 
 Rainforest Automation Documentation
