@@ -17,14 +17,19 @@ API Calls
 
 
 ```python
-get_demand_values(self, macid=None, interval='hour', frequency=None)
+
+list_devices()
+get_demand_values(macid=None, interval='hour', frequency=None)
+get_device_data(macid=None)
+get_fast_poll_status(macid=None)
+get_history_data(macid=None, starttime='0x00000000', endtime=None, frequency=None)
+get_instantaneous_demand(macid=None)
+get_summation_values(macid=None, interval='day')
+set_fast_poll(macid=None, frequency='0x04', duration='0xFF')
+
 ```
-Send the GET_DEMAND_VALUES command 
-get a series of instantaneous demand values
 
-
-
-## Rainforest Automation Documentation
+# Automation Documentation
 
 * Developer Portal http://rainforestautomation.com/developer
 
