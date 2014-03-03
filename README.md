@@ -1,4 +1,6 @@
 
+# Python class for Rainforest Eagle
+
 Python Class for utilizing the Rainforest Automation Eagle ( RFA-Z109 ) socket API
 
 
@@ -10,10 +12,19 @@ Python Class for utilizing the Rainforest Automation Eagle ( RFA-Z109 ) socket A
     print "device MacID = ", ret_data['DeviceInfo']['DeviceMacId']
 
 
+API Calls
 
 
-Rainforest Automation Documentation
------------------------------------
+
+```python
+get_demand_values(self, macid=None, interval='hour', frequency=None)
+```
+Send the GET_DEMAND_VALUES command 
+get a series of instantaneous demand values
+
+
+
+## Rainforest Automation Documentation
 
 * Developer Portal http://rainforestautomation.com/developer
 
