@@ -17,7 +17,7 @@ from pprint import pprint
 
 __all__ = ['Eagle']
 
-def et2d(et) :
+def _et2d(et) :
 
     """ Etree to Dict
 
@@ -50,9 +50,9 @@ def et2d(et) :
 		    d[child.tag] = [t]
 	    if list(child) or child.attrib :
 		if child.tag in d :
-		    d[child.tag].append(et2d(child))
+		    d[child.tag].append(_et2d(child))
 		else :
-		    d[child.tag] = et2d(child)
+		    d[child.tag] = _et2d(child)
 	    else :
 		if child.tag in d :
 		    d[child.tag].append(child.text)
@@ -104,7 +104,7 @@ class Eagle(object) :
 	if self.debug :
 	    print "comm_responce =", comm_responce
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
-	rv = et2d(etree)
+	rv = _et2d(etree)
 	if self.macid == None :
 	    self.macid =  rv['DeviceInfo']['DeviceMacId']
 	return rv
@@ -116,7 +116,7 @@ class Eagle(object) :
 	    macid = self.macid
 	comm_responce = self._send_comm("get_device_data", MacId=macid)
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
-	rv = et2d(etree)
+	rv = _et2d(etree)
 	return rv
 
     # 10
@@ -132,7 +132,7 @@ class Eagle(object) :
 	comm_responce = self._send_comm("get_instantaneous_demand",
 		MacId=macid)
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
-	rv = et2d(etree)
+	rv = _et2d(etree)
 	return rv
 
     # 11
@@ -152,7 +152,7 @@ class Eagle(object) :
 	    kwargs["Frequency"] = frequency
 	comm_responce = self._send_comm("get_demand_values", **kwargs)
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
-	rv = et2d(etree)
+	rv = _et2d(etree)
 	return rv
 
     # 12
@@ -169,7 +169,7 @@ class Eagle(object) :
 	comm_responce = self._send_comm("get_summation_values",
 	    MacId=macid, Interval=interval )
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
-	rv = et2d(etree)
+	rv = _et2d(etree)
 	return rv
 
     # 14
@@ -192,7 +192,7 @@ class Eagle(object) :
 	comm_responce = self._send_comm("get_instantaneous_demand",
 	    MacId=macid, Frequency=frequency, Duration=duration)
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
-	rv = et2d(etree)
+	rv = _et2d(etree)
 	return rv
 
     # 15
@@ -207,7 +207,7 @@ class Eagle(object) :
 	    macid = self.macid
 	comm_responce = self._send_comm("get_fast_poll_status", MacId=macid)
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
-	rv = et2d(etree)
+	rv = _et2d(etree)
 	return rv
 
 
@@ -223,18 +223,18 @@ class Eagle(object) :
 	    kwargs["EndTime"] = endtime
 	if frequency :
 	    kwargs["Frequency"] = frequency
-	comm_responce = self._send_comm("get_fast_poll_status", **kwargs)
+	comm_responce = self._send_comm("get_history_data", **kwargs)
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
-	rv = et2d(etree)
+	rv = _et2d(etree)
 	return rv
 
 
     # Support functions
 
-    def connect(self) :
+    def _connect(self) :
 	self.soc = socket.create_connection( (self.addr, self.port), 10)
 
-    def disconnect(self):
+    def _disconnect(self):
         try :
             if self.soc :
                 self.soc.close()
@@ -256,22 +256,28 @@ class Eagle(object) :
 	    commstr += "<{0}>{1!s}</{0}>\n".format(k, v)
 	commstr += "</{0}>\n".format(command_tag)
 
-	self.connect()
-	self.soc.sendall(commstr)
-	if self.debug :
-	    print "commstr : \n", commstr
+	try:
+	    self._connect()
+	    self.soc.sendall(commstr)
+	    if self.debug :
+		print "commstr : \n", commstr
 
-	# time.sleep(1)
+	    # time.sleep(1)
 
-	replystr = ""
-	while 1 :
-	    buf = self.soc.recv(1000)
-	    if not buf:
-		break
-	    replystr += buf
+	    replystr = ""
+	    while 1 :
+		buf = self.soc.recv(1000)
+		if not buf:
+		    break
+		replystr += buf
 
-	self.disconnect()
-	return replystr 
+	except Exception:
+	    print("Unexpected error:", sys.exc_info()[0])
+	    print(ddat)
+	    replystr = None
+	finally:
+	    self._disconnect()
+	    return replystr 
 
     def to_unix_time(self, t) :
 	""" converts time stored as

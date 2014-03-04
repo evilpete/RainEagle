@@ -21,15 +21,16 @@ API Call list :
     list_devices()
     get_demand_values(macid=None, interval='hour', frequency=None)
     get_device_data(macid=None)
-    get_fast_poll_status(macid=None)
     get_history_data(macid=None, starttime='0x00000000', endtime=None, frequency=None)
     get_instantaneous_demand(macid=None)
     get_summation_values(macid=None, interval='day')
+    get_fast_poll_status(macid=None)
     set_fast_poll(macid=None, frequency='0x04', duration='0xFF')
 
 ```
 
-Calls return dictionarys containing data results
+API Calls return dictionarys containing data results
+returns None if error
 
 ## External Documentation
 
