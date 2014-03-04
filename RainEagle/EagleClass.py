@@ -223,7 +223,7 @@ class Eagle(object) :
 	    kwargs["EndTime"] = endtime
 	if frequency :
 	    kwargs["Frequency"] = frequency
-	comm_responce = self._send_comm("get_fast_poll_status", **kwargs)
+	comm_responce = self._send_comm("get_history_data", **kwargs)
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
 	rv = et2d(etree)
 	return rv
