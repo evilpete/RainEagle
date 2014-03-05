@@ -83,17 +83,26 @@ class Eagle(object) :
 	self.addr = kwargs.get("addr", os.getenv('EAGLE_ADDR', None))
 	self.port = kwargs.get("port", os.getenv('EAGLE_PORT', 5002))
 	self.getmac = kwargs.get("getmac", True)
+	self.timeout = kwargs.get("timeout", 10)
 	self.soc = None
 	self.macid = None
+
+	if self.debug :
+	    print "Addr :  = ", self.addr
+	    print "timeout :  = ", self.timeout
+	    print "debug :  = ", self.debug
 
 	# preload
 	if self.getmac :
 	    self.device_info = self.list_devices()
+	    if self.device_info == None :
+		raise IOError("Error connecting")
 	    if self.debug :
+		print "__init__ ",
 		pprint(self.device_info)
 	    # self.macid =  self.device_info['DeviceInfo']['DeviceMacId']
 	    if self.debug :
-		print "DeviceMacId = ", self.macid
+		print "Init DeviceMacId = ", self.macid
 
 
 
@@ -103,6 +112,8 @@ class Eagle(object) :
 	comm_responce = self._send_comm("list_devices")
 	if self.debug :
 	    print "comm_responce =", comm_responce
+	if comm_responce == None:
+	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
 	rv = _et2d(etree)
 	if self.macid == None :
@@ -115,6 +126,8 @@ class Eagle(object) :
 	if macid == None :
 	    macid = self.macid
 	comm_responce = self._send_comm("get_device_data", MacId=macid)
+	if comm_responce == None:
+	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
 	rv = _et2d(etree)
 	return rv
@@ -131,6 +144,8 @@ class Eagle(object) :
 	    macid = self.macid
 	comm_responce = self._send_comm("get_instantaneous_demand",
 		MacId=macid)
+	if comm_responce == None:
+	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
 	rv = _et2d(etree)
 	return rv
@@ -151,6 +166,8 @@ class Eagle(object) :
 	if frequency :
 	    kwargs["Frequency"] = frequency
 	comm_responce = self._send_comm("get_demand_values", **kwargs)
+	if comm_responce == None:
+	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
 	rv = _et2d(etree)
 	return rv
@@ -168,6 +185,8 @@ class Eagle(object) :
 	    macid = self.macid
 	comm_responce = self._send_comm("get_summation_values",
 	    MacId=macid, Interval=interval )
+	if comm_responce == None:
+	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
 	rv = _et2d(etree)
 	return rv
@@ -191,6 +210,8 @@ class Eagle(object) :
 
 	comm_responce = self._send_comm("get_instantaneous_demand",
 	    MacId=macid, Frequency=frequency, Duration=duration)
+	if comm_responce == None:
+	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
 	rv = _et2d(etree)
 	return rv
@@ -206,6 +227,8 @@ class Eagle(object) :
 	if macid == None :
 	    macid = self.macid
 	comm_responce = self._send_comm("get_fast_poll_status", MacId=macid)
+	if comm_responce == None:
+	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
 	rv = _et2d(etree)
 	return rv
@@ -215,6 +238,12 @@ class Eagle(object) :
     def get_history_data(self, macid=None, starttime="0x00000000", endtime=None, frequency=None ) :
 	""" Send the GET_HISTORY_DATA command
 	    get a series of summation values over an interval of time
+
+	    args:
+		MacId	16 hex digits, MAC addr of EAGLE ZigBee radio
+		StartTime	the start of the history interval (default oldest sample)
+		EndTime		the end of the history interval (default current time)
+		Frequency	Requested number of seconds between samples.
 	"""
 	if macid == None :
 	    macid = self.macid
@@ -224,6 +253,8 @@ class Eagle(object) :
 	if frequency :
 	    kwargs["Frequency"] = frequency
 	comm_responce = self._send_comm("get_history_data", **kwargs)
+	if comm_responce == None :
+	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
 	rv = _et2d(etree)
 	return rv
@@ -250,21 +281,25 @@ class Eagle(object) :
 	else :
 	    command_tag = "LocalCommand"
 
+
 	commstr = "<{0}>\n ".format(command_tag)
 	commstr += "<Name>{0!s}</Name>\n".format(cmd)
 	for k, v in kwargs.items() :
 	    commstr += "<{0}>{1!s}</{0}>\n".format(k, v)
 	commstr += "</{0}>\n".format(command_tag)
+	replystr = ""
 
 	try:
 	    self._connect()
+
+	    if cmd == "get_history_data" :
+		self.soc.settimeout(45)
 	    self.soc.sendall(commstr)
 	    if self.debug :
 		print "commstr : \n", commstr
 
 	    # time.sleep(1)
 
-	    replystr = ""
 	    while 1 :
 		buf = self.soc.recv(1000)
 		if not buf:
@@ -273,10 +308,12 @@ class Eagle(object) :
 
 	except Exception:
 	    print("Unexpected error:", sys.exc_info()[0])
-	    print(ddat)
+	    print "Error replystr = ", replystr
 	    replystr = None
 	finally:
 	    self._disconnect()
+	    if self.debug > 1 :
+		print "_send_comm replystr :\n", replystr
 	    return replystr 
 
     def to_unix_time(self, t) :
