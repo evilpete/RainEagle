@@ -50,7 +50,7 @@ print  s
 
 time.sleep(1)
 
-sendstr = "<LocalCommand>\n<Name>get_history_data</Name>\n<MacId>0xd8d5b90000001296</MacId>\n<StartTime>0x00000000</StartTime>\n</LocalCommand>\n".format(my_macid)
+sendstr = "<LocalCommand>\n<Name>get_history_data</Name>\n<MacId{0}</MacId>\n<StartTime>0x00000000</StartTime>\n</LocalCommand>\n".format(my_macid)
 
 s.sendall(sendstr)
 print
