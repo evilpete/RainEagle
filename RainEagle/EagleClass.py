@@ -9,13 +9,32 @@ import sys
 import os
 import time
 import xml.etree.ElementTree as ET
+import urllib
+import urllib2
+from math import floor
+from urlparse import urlparse
+import json
+
+
 
 from pprint import pprint
  
-  
 
+api_arg_format = {
 
-__all__ = ['Eagle']
+}
+
+__all__ = ['Eagle', 'to_unix_time']
+
+def to_unix_time(t) :
+    """ converts time stored as
+	offset in seconds from "Jan 1 00:00:00 2000"
+	to unix's epoch of 1970
+    """
+    if isinstance(t, (int, long, float) ) :
+	return t + 946684800
+    if isinstance(t, str) and t.startswith('0x') :
+	return 946684800 + int(t, 16)
 
 def _et2d(et) :
 
@@ -59,6 +78,19 @@ def _et2d(et) :
 		else :
 		    d[child.tag] = child.text
     return d
+
+    def _tohex(n, width=10) :
+	""" convert arg to string with hex representation if possible"""
+	if isinstance(n, str) :
+	    if n.isdigit() :
+		return "{:#{width}x}".format(int(n), width=width)
+	    else :
+		return n
+	if isinstance(n, (int, long) ) :
+	    return "{:#{width}x}".format(n, width=width)
+	if isinstance(n, float) :
+	    return "{:#{width}x}".format(int(n), width=width)
+	return n
 
 
 
@@ -106,10 +138,10 @@ class Eagle(object) :
 
 
 
-# commands as class funtions
+# socket commands as class functions
 
     def list_devices(self):
-	comm_responce = self._send_comm("list_devices")
+	comm_responce = self._send_soc_comm("list_devices")
 	if self.debug :
 	    print "comm_responce =", comm_responce
 	if comm_responce == None:
@@ -125,7 +157,7 @@ class Eagle(object) :
 	""" Send the GET_DEVICE_DATA command to get a data dump """
 	if macid == None :
 	    macid = self.macid
-	comm_responce = self._send_comm("get_device_data", MacId=macid)
+	comm_responce = self._send_soc_comm("get_device_data", MacId=macid)
 	if comm_responce == None:
 	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
@@ -142,7 +174,7 @@ class Eagle(object) :
         """
 	if macid == None :
 	    macid = self.macid
-	comm_responce = self._send_comm("get_instantaneous_demand",
+	comm_responce = self._send_soc_comm("get_instantaneous_demand",
 		MacId=macid)
 	if comm_responce == None:
 	    return None
@@ -162,10 +194,12 @@ class Eagle(object) :
         """
 	if macid == None :
 	    macid = self.macid
+	if interval not in ['hour', 'day', 'week' ] :
+	    raise ValueError("set_time_source interval must be 'hour', 'day' or 'week' ")
 	kwargs = {"MacId": macid, "Interval": interval}
 	if frequency :
-	    kwargs["Frequency"] = frequency
-	comm_responce = self._send_comm("get_demand_values", **kwargs)
+	    kwargs["Frequency"] = str(frequency)
+	comm_responce = self._send_soc_comm("get_demand_values", **kwargs)
 	if comm_responce == None:
 	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
@@ -183,7 +217,9 @@ class Eagle(object) :
         """
 	if macid == None :
 	    macid = self.macid
-	comm_responce = self._send_comm("get_summation_values",
+	if interval not in ['day', 'week', 'month', 'year'] :
+	    raise ValueError("set_time_source interval must be 'day', 'week', 'month' or 'year'")
+	comm_responce = self._send_soc_comm("get_summation_values",
 	    MacId=macid, Interval=interval )
 	if comm_responce == None:
 	    return None
@@ -203,12 +239,10 @@ class Eagle(object) :
 	"""
 	if macid == None :
 	    macid = self.macid
-	if isinstance(frequency, int) :
-	    frequency = "{:#04x}".format(m)
-	if isinstance(duration, int) :
-	    frequency = "{:#04x}".format(m)
+	frequency = _tohex(frequency, 4)
+	duration = _tohex(duration, 4)
 
-	comm_responce = self._send_comm("get_instantaneous_demand",
+	comm_responce = self._send_soc_comm("get_instantaneous_demand",
 	    MacId=macid, Frequency=frequency, Duration=duration)
 	if comm_responce == None:
 	    return None
@@ -226,7 +260,7 @@ class Eagle(object) :
 	"""
 	if macid == None :
 	    macid = self.macid
-	comm_responce = self._send_comm("get_fast_poll_status", MacId=macid)
+	comm_responce = self._send_soc_comm("get_fast_poll_status", MacId=macid)
 	if comm_responce == None:
 	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
@@ -247,12 +281,13 @@ class Eagle(object) :
 	"""
 	if macid == None :
 	    macid = self.macid
-	kwargs = {"MacId": macid, "StartTime": starttime}
+	kwargs = {"MacId": macid,}
+	kwargs["StartTime"] = _tohex(starttime, 10)
 	if endtime :
-	    kwargs["EndTime"] = endtime
+	    kwargs["EndTime"] = _tohex(endtime, 10)
 	if frequency :
-	    kwargs["Frequency"] = frequency
-	comm_responce = self._send_comm("get_history_data", **kwargs)
+	    kwargs["Frequency"] =  _tohex(endtime, 6)
+	comm_responce = self._send_soc_comm("get_history_data", **kwargs)
 	if comm_responce == None :
 	    return None
 	etree = ET.fromstring('<S>' + comm_responce + '</S>' )
@@ -260,7 +295,165 @@ class Eagle(object) :
 	return rv
 
 
-    # Support functions
+# http commands as class functions
+
+    def get_setting_data(self) :
+	comm_responce = self._send_http_comm("get_setting_data")
+	return comm_responce
+
+    def get_device_config(self) :
+	comm_responce = self._send_http_comm("get_device_config")
+	return comm_responce
+
+    def get_timezone(self) :
+	comm_responce = self._send_http_comm("get_timezone")
+	return comm_responce
+
+    def get_time_source(self, macid=None) :
+	comm_responce = self._send_http_comm("get_time_source")
+	return comm_responce
+
+    def set_remote_management(self, macid=None, status=None) :
+	""" set_remote_management
+	    enabling ssh & vpn
+
+	    args:
+		status		yes|no
+
+	"""
+	if status not in ['yes', 'no'] :
+	    raise ValueError("set_remote_management status must be 'yes' or 'no'")
+	comm_responce = self._send_http_comm("set_remote_management", Status=status)
+	return comm_responce
+
+
+    def set_time_source(self, macid=None, source=None) :
+	""" set_time_source
+	    set time source
+
+	    args:
+		source		meter|internet
+	"""
+	if status not in ['meter', 'internet'] :
+	    raise ValueError("set_time_source Source must be 'meter' or 'internet'")
+	comm_responce = self._send_http_comm("set_time_source", Source=source)
+	return comm_responce
+
+    def get_price(self) :
+	"""
+	    get price for kWh
+	"""
+	comm_responce = self._send_http_comm("get_price")
+	return comm_responce
+
+    def set_price(self, price) :
+	"""
+	    Set price manualy 
+
+	    args:
+		price		Price/kWh
+	"""
+	#if isinstance(price, str) :
+	#    price = float(price.lstrip('$'))
+
+	if not isinstance(price, (int, long, float) ) : 
+	    raise ValueError("set_price price arg must me a int, long or float")
+
+	trailing_digits     = 0
+	multiplier          = 1
+	while (((price * multiplier) != (floor(price * multiplier))) and (trailing_digits < 7) ) :
+	    trailing_digits += 1
+	    multiplier *= 10
+
+	price_adj = "{:#x}".format( int(price * multiplier) )
+	tdigits = "{:#x}".format(  trailing_digits )
+
+	comm_responce = self._send_http_comm("set_price", Price=price_adj, TrailingDigits=tdigits)
+	return comm_responce
+
+
+    def set_price_auto(self) :
+	"""
+	    Set Price from Meter
+	"""
+	comm_responce = self._send_http_comm("set_price",
+	    Price="0xFFFFFFFF",
+	    TrailingDigits="0x00")
+	return comm_responce
+
+    def factory_reset(self) :
+	"""
+	    Factory Reset
+	"""
+	comm_responce = self._send_http_comm("factory_reset")
+	return comm_responce
+
+
+#    def disconnect_meter(self) :
+#	"""
+#	    disconnect from Smart Meter
+#	"""
+#	comm_responce = self._send_http_comm("disconnect_meter")
+#	return comm_responce
+
+
+
+    def cloud_reset(self) :
+	"""
+	    cloud_reset : Clear Cloud Configuration
+	"""
+	comm_responce = self._send_http_comm("cloud_reset")
+	return comm_responce
+
+
+    def set_cloud(self, url) :
+	"""
+	    set cloud Url
+	"""
+	if url.__len__() > 200 :
+	    raise ValueError("Max URL length is 200 characters long.\n")
+
+	urlp = urlparse(url)
+
+	if urlp.port :
+	    port = "{:#4x}".format(urlp.port)
+	else :
+	    port = "0x00"
+
+	hostname = urlp.hostname
+
+	if urlp.scheme :
+	    protocol = urlp.scheme
+	else :
+	    protocol = "http"
+
+	url = urlp.path
+
+
+	if urlp.username :
+	    userid = urlp.username
+	else :
+	    userid = ""
+
+	if urlp.password :
+	    password = urlp.password
+	else :
+	    password = ""
+
+	comm_responce = self._send_http_comm("set_cloud",
+	    Provider="manual",
+	    Protocol=protocol, HostName=hostname,
+	    Url=url, Port=port,
+	    AuthCode="", Email="",
+            UserId=userid, Password=password)
+
+	return comm_responce
+	    
+
+
+
+
+# Support functions
 
     def _connect(self) :
 	self.soc = socket.create_connection( (self.addr, self.port), 10)
@@ -274,7 +467,30 @@ class Eagle(object) :
             pass
 
 
-    def _send_comm(self, cmd, **kwargs):
+    def _send_http_comm(self, cmd, **kwargs):
+
+	print "\n\n_send_http_comm : ", cmd
+
+	commstr = "<LocalCommand>\n"
+	commstr += "<Name>{0!s}</Name>\n".format(cmd)
+	commstr += "<MacId>{0!s}</MacId>\n".format(self.macid)
+	for k, v in kwargs.items() :
+	    commstr += "<{0}>{1!s}</{0}>\n".format(k, v)
+	commstr += "</LocalCommand>\n"
+
+	print(commstr)
+
+	url = "http://{0}/cgi-bin/cgi_manager".format(self.addr)
+
+	req = urllib2.Request(url, commstr)
+	response = urllib2.urlopen(req)
+	the_page = response.read()
+
+	return the_page
+
+
+
+    def _send_soc_comm(self, cmd, **kwargs):
 
 	if cmd == "set_fast_poll" :
 	    command_tag = "RavenCommand"
@@ -288,6 +504,7 @@ class Eagle(object) :
 	    commstr += "<{0}>{1!s}</{0}>\n".format(k, v)
 	commstr += "</{0}>\n".format(command_tag)
 	replystr = ""
+	# buf_list = []
 
 	try:
 	    self._connect()
@@ -305,6 +522,8 @@ class Eagle(object) :
 		if not buf:
 		    break
 		replystr += buf
+		#buf_list.append(buf)
+	    # replystr = ''.join(buf_list)
 
 	except Exception:
 	    print("Unexpected error:", sys.exc_info()[0])
@@ -313,18 +532,9 @@ class Eagle(object) :
 	finally:
 	    self._disconnect()
 	    if self.debug > 1 :
-		print "_send_comm replystr :\n", replystr
+		print "_send_soc_comm replystr :\n", replystr
 	    return replystr 
 
-    def to_unix_time(self, t) :
-	""" converts time stored as
-	    offset in seconds from "Jan 1 00:00:00 2000"
-	    to unix's epoch of 1970
-	"""
-	if isinstance(t, (int, long, float) ) :
-	    return t + 946684800
-	if isinstance(t, str) and t.startswith('0x') :
-	    return 946684800 + int(t, 16)
 
 # Do nothing 
 # (syntax check) 
