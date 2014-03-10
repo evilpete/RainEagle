@@ -1,0 +1,149 @@
+Help on module EagleClass:
+
+NAME
+    EagleClass
+
+FILE
+    RainEagle/EagleClass.py
+
+CLASSES
+    __builtin__.object
+        Eagle
+    
+    class Eagle(__builtin__.object)
+     |  Class for talking to Rainforest Automation EAGLE (RFA-Z109)
+     |  
+     |  args:
+     |      debug       print debug messages if true
+     |      addr        address of device
+     |      port        port on device (default 5002)
+     |      getmac      connect to device at start up and get macid (default true)
+     |  
+     |  Currently there is very little error handling ( if any at all )
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, **kwargs)
+     |  
+     |  cloud_reset(self)
+     |      cloud_reset : Clear Cloud Configuration
+     |  
+     |  factory_reset(self)
+     |      Factory Reset
+     |  
+     |  get_demand_values(self, macid=None, interval='hour', frequency=None)
+     |      Send the GET_DEMAND_VALUES command 
+     |      get a series of instantaneous demand values
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |          Interval        hour | day | week
+     |          [Frequency]     int   seconds between samples
+     |  
+     |  get_device_config(self)
+     |      get configs
+     |  
+     |  get_device_data(self, macid=None)
+     |      Send the GET_DEVICE_DATA command to get a data dump
+     |  
+     |  get_fast_poll_status(self, macid=None)
+     |      Send the GET_FAST_POLL_STATUS command
+     |      get the current status of fast poll mode.
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |  
+     |  get_history_data(self, macid=None, starttime='0x00000000', endtime=None, frequency=None)
+     |      Send the GET_HISTORY_DATA command
+     |      get a series of summation values over an interval of time
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |          StartTime       the start of the history interval (default oldest sample)
+     |          EndTime         the end of the history interval (default current time)
+     |          Frequency       Requested number of seconds between samples.
+     |  
+     |  get_instantaneous_demand(self, macid=None)
+     |      Send the GET_INSTANTANEOUS_DEMAND command
+     |      get the real time demand from the meter
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |  
+     |  get_price(self)
+     |      get price for kWh
+     |  
+     |  get_setting_data(self)
+     |      get settings
+     |  
+     |  get_summation_values(self, macid=None, interval='day')
+     |      Send the GET_SUMMATION_VALUES command 
+     |      get a series of net summation values
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |          Interval        day | week | month | year
+     |  
+     |  get_time_source(self, macid=None)
+     |      get time source for device 
+     |      retrrns value "meter" or "nternet"
+     |  
+     |  get_timezone(self)
+     |      get current timezone configuration
+     |  
+     |  list_devices(self)
+     |  
+     |  set_cloud(self, url)
+     |      set cloud Url
+     |  
+     |  set_fast_poll(self, macid=None, frequency='0x04', duration='0xFF')
+     |      Send the SET_FAST_POLL command
+     |      set the fast poll mode on the meter
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |          Frequency       0x01 - 0xFF     Freq to poll meter, in seconds
+     |          Duration        0x00 - 0x0F     Duration of fast poll mode, in minutes (max 15)
+     |  
+     |  set_price(self, price)
+     |      Set price manualy 
+     |      
+     |      args:
+     |          price           Price/kWh
+     |  
+     |  set_price_auto(self)
+     |      Set Price from Meter
+     |  
+     |  set_remote_management(self, macid=None, status=None)
+     |      set_remote_management
+     |      enabling ssh & vpn
+     |      
+     |      args:
+     |          status          yes|no
+     |  
+     |  set_time_source(self, macid=None, source=None)
+     |      set_time_source
+     |      set time source
+     |      
+     |      args:
+     |          source          meter|internet
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+DATA
+    __all__ = ['Eagle', 'to_epoch_1970, to_epoch_2000']
+    __author__ = 'Peter Shipley <peter.shipley@gmail.com>'
+    __copyright__ = 'Copyright (C) 2014 Peter Shipley'
+    __license__ = 'BSD'
+
+AUTHOR
+    Peter Shipley <peter.shipley@gmail.com>
+
+
