@@ -24,9 +24,19 @@ api_arg_format = {
 
 }
 
-__all__ = ['Eagle', 'to_unix_time']
+__all__ = ['Eagle', 'to_epoch_1970, to_epoch_2000']
 
-def to_unix_time(t) :
+def to_epoch_2000(t) :
+    """ converts time stored as
+	to unix's epoch of 1970
+	offset in seconds from "Jan 1 00:00:00 2000"
+    """
+    if isinstance(t, time.struct_time ) :
+	t = time.mktime(t)
+    return t - 946684800
+
+
+def to_epoch_1970(t) :
     """ converts time stored as
 	offset in seconds from "Jan 1 00:00:00 2000"
 	to unix's epoch of 1970
@@ -79,18 +89,18 @@ def _et2d(et) :
 		    d[child.tag] = child.text
     return d
 
-    def _tohex(n, width=10) :
-	""" convert arg to string with hex representation if possible"""
-	if isinstance(n, str) :
-	    if n.isdigit() :
-		return "{:#{width}x}".format(int(n), width=width)
-	    else :
-		return n
-	if isinstance(n, (int, long) ) :
-	    return "{:#{width}x}".format(n, width=width)
-	if isinstance(n, float) :
+def _tohex(n, width=10) :
+    """ convert arg to string with hex representation if possible"""
+    if isinstance(n, str) :
+	if n.isdigit() :
 	    return "{:#{width}x}".format(int(n), width=width)
-	return n
+	else :
+	    return n
+    if isinstance(n, (int, long) ) :
+	return "{:#{width}x}".format(n, width=width)
+    if isinstance(n, float) :
+	return "{:#{width}x}".format(int(n), width=width)
+    return n
 
 
 
@@ -298,18 +308,31 @@ class Eagle(object) :
 # http commands as class functions
 
     def get_setting_data(self) :
+	"""
+	    get settings
+	"""
 	comm_responce = self._send_http_comm("get_setting_data")
 	return comm_responce
 
     def get_device_config(self) :
+	"""
+	    get configs
+	"""
 	comm_responce = self._send_http_comm("get_device_config")
 	return comm_responce
 
     def get_timezone(self) :
+	"""
+	    get current timezone configuration
+	"""
 	comm_responce = self._send_http_comm("get_timezone")
 	return comm_responce
 
     def get_time_source(self, macid=None) :
+	"""
+	    get time source for device 
+	    retrrns value "meter" or "nternet"
+	"""
 	comm_responce = self._send_http_comm("get_time_source")
 	return comm_responce
 
@@ -456,7 +479,7 @@ class Eagle(object) :
 # Support functions
 
     def _connect(self) :
-	self.soc = socket.create_connection( (self.addr, self.port), 10)
+	self.soc = socket.create_connection( (self.addr, self.port), self.timeout)
 
     def _disconnect(self):
         try :
@@ -509,8 +532,8 @@ class Eagle(object) :
 	try:
 	    self._connect()
 
-	    if cmd == "get_history_data" :
-		self.soc.settimeout(45)
+	    # if cmd == "get_history_data" :
+	# 	self.soc.settimeout(45)
 	    self.soc.sendall(commstr)
 	    if self.debug :
 		print "commstr : \n", commstr

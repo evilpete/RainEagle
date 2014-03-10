@@ -14,10 +14,11 @@ __copyright__ = "Copyright (C) 2014 Peter Shipley"
 __license__ = "BSD"
 
 
-from EagleClass import Eagle
+import EagleClass
+from EagleClass import Eagle,  to_epoch_1970, to_epoch_2000
 #from RainEagle.EagleClass import Eagle
 
-__all__ = ['Eagle']
+__all__ = ['Eagle', 'to_epoch_1970', 'to_epoch_2000']
 
 
 
