@@ -44,6 +44,11 @@ def main() :
 
     exit(0)
 
+def twos_comp(val, bits=32):
+    """compute the 2's compliment of int value val"""
+    if( (val&(1<<(bits-1))) != 0 ):
+	val = val - (1<<bits)
+    return val
 
 def print_currentsummation(cs) :
 
@@ -64,9 +69,9 @@ def print_currentsummation(cs) :
     time_stamp = to_epoch_1970(cs['TimeStamp'])
 
     print time.asctime(time.localtime(time_stamp)), " : "
-    print "\tReceived=", reading_received, "Kw"
+    print "\tReceived =", reading_received, "Kw"
     print "\tDelivered=", reading_delivered, "Kw"
-    print "\t\t", (reading_delivered - reading_received)
+    print "\t\t\t", (reading_delivered - reading_received)
 
 
 #    print "{0}\t{1:.4f}\t{2:0.4f}\t{3:.4f}".format(
@@ -82,7 +87,10 @@ def print_instantdemand(idemand) :
 
     multiplier=int(idemand['Multiplier'], 16)
     divisor=int(idemand['Divisor'], 16)
+#    demand =  twos_comp(int(idemand['Demand'], 16))
     demand=int(idemand['Demand'], 16)
+    if demand > 0x7FFFFFFF:
+	demand -= 0x100000000
 
     # print "Multiplier=", multiplier, "Divisor=", divisor, "Demand=", demand
  
@@ -92,11 +100,11 @@ def print_instantdemand(idemand) :
     if divisor == 0 :
 	divisor=1
 
-    reading =  demand * multiplier /  float (divisor )
+    reading =  (demand * multiplier) /  float (divisor )
 
     print time.asctime(time.localtime(time_stamp)), " : "
     print "\tDemand=", reading, "Kw"
-    print "\tAmps={:.3f}".format( ((reading * 1000) / 240) )
+    print "\tAmps  = {:.3f}".format( ((reading * 1000) / 240) )
 
 
 
