@@ -1,0 +1,364 @@
+Help on module EagleClass:
+
+NAME
+    EagleClass
+
+FILE
+    RainEagle/EagleClass.py
+
+CLASSES
+    __builtin__.object
+        Eagle
+    exceptions.RuntimeError(exceptions.StandardError)
+        RainEagleResponseError
+    
+    class Eagle(__builtin__.object)
+     |  Class for talking to Rainforest Automation EAGLE (RFA-Z109)
+     |  
+     |  args:
+     |      debug       print debug messages if true
+     |      addr        address of device
+     |      port        port on device (default 5002)
+     |      getmac      connect to device at start up and get macid (default true)
+     |  
+     |  Currently there is very little error handling ( if any at all )
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, **kwargs)
+     |  
+     |  cloud_reset(self)
+     |      cloud_reset : Clear Cloud Configuration
+     |  
+     |  confirm_message(self, id)
+     |  
+     |  factory_reset(self)
+     |      Factory Reset
+     |  
+     |  get_demand_values(self, macid=None, interval='hour', frequency=None)
+     |      Send the GET_DEMAND_VALUES command
+     |      get a series of instantaneous demand values
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |          Interval        hour | day | week
+     |          [Frequency]     int   seconds between samples
+     |  
+     |  get_device_config(self)
+     |      get remote management status
+     |      
+     |      On Success returns dict with value 'Y' or 'N' :
+     |         'config_ssh_enabled':    'Y'
+     |         'config_vpn_enabled':    'Y'
+     |  
+     |  get_device_data(self, macid=None)
+     |      Send the GET_DEVICE_DATA command to get a data dump
+     |  
+     |  get_fast_poll_status(self, macid=None)
+     |      Send the GET_FAST_POLL_STATUS command
+     |      get the current status of fast poll mode.
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |  
+     |  get_gateway_info(self)
+     |      gets network status
+     |      
+     |      On Success returns dict with the values (example):
+     |          'gateway_cloud_id':             '00:09:69'
+     |          'gateway_internet_status':      'connected'
+     |          'gateway_ip_addr':              '10.11.12.13'
+     |          'gateway_mac_id':               'D8:D5:B9:00:90:24'
+     |  
+     |  get_historical_data_alt(self, period='day')
+     |      get a series of summation values over an interval of time
+     |      ( http command api )
+     |      
+     |      args:
+     |          period          day|week|month|year
+     |      
+     |      On Success returns dict with the values (example):
+     |          'data_period'            'day',
+     |          'data_size'              '14',
+     |          'timestamp[0]'           '1394422200',
+     |          'timestamp[1]'           '1394425800',
+     |          'timestamp[2]'           '1394429400',
+     |          'timestamp[3]'           '1394433000',
+     |          'timestamp[4]'           '1394436600',
+     |          'timestamp[5]'           '1394440200',
+     |          'timestamp[6]'           '1394443800',
+     |          'timestamp[7]'           '1394447400',
+     |          'timestamp[8]'           '1394451000',
+     |          'timestamp[9]'           '1394454600',
+     |          'timestamp[10]'          '1394458200',
+     |          'timestamp[11]'          '1394461800',
+     |          'timestamp[12]'          '1394465400',
+     |          'timestamp[13]'          '1394469000',
+     |          'value[0]'               '0.429',
+     |          'value[1]'               '0.426',
+     |          'value[2]'               '0.422',
+     |          'value[3]'               '0.627',
+     |          'value[4]'               '0.735',
+     |          'value[5]'               '0.193',
+     |          'value[6]'               '0.026',
+     |          'value[7]'               '-0.985',
+     |          'value[8]'               '-1.491',
+     |          'value[9]'               '-2.196'}
+     |          'value[11]'              '-1.868',
+     |          'value[12]'              '-1.330',
+     |          'value[13]'              '-0.870',
+     |  
+     |  get_history_data(self, macid=None, starttime='0x00000000', endtime=None, frequency=None)
+     |      Send the GET_HISTORY_DATA command
+     |      get a series of summation values over an interval of time
+     |      ( socket command api )
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |          StartTime       the start of the history interval (default oldest sample)
+     |          EndTime         the end of the history interval (default current time)
+     |          Frequency       Requested number of seconds between samples.
+     |  
+     |  get_instantaneous_demand(self, macid=None)
+     |      Send the GET_INSTANTANEOUS_DEMAND command
+     |      get the real time demand from the meter
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |  
+     |  get_message(self)
+     |      On Success returns dict with the values (example):
+     |          "meter_status" :        "Connected"
+     |          "message_timestamp" :   "946684800"
+     |          "message_text" :        ""
+     |          "message_confirmed" :   "N"
+     |          "message_confirm_required" :    "N"
+     |          "message_id" :  "0"
+     |          "message_queue" :       "active"
+     |          "message_priority" :    ""
+     |          "message_read" :        "Y"
+     |  
+     |  get_price(self)
+     |      get price for kWh
+     |      
+     |      On Success returns (example):
+     |          price':         '0.1300',
+     |          price_label':   'Set by User' or '--'
+     |          price_timestamp': '1394524458',
+     |          price_units':   '$'}
+     |      
+     |      returns empty dict on Error
+     |  
+     |  get_remote_management(self)
+     |  
+     |  get_setting_data(self)
+     |      get settings data
+     |      
+     |      returns empty dict on Error
+     |  
+     |  get_summation_values(self, macid=None, interval='day')
+     |      Send the GET_SUMMATION_VALUES command
+     |      get a series of net summation values
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |          Interval        day | week | month | year
+     |  
+     |  get_time_source(self, macid=None)
+     |      get time source for device
+     |      
+     |      On Success returns dict with value 'internet' or 'meter' :
+     |         'time_source':           'internet'}
+     |  
+     |  get_timezone(self)
+     |      get current timezone configuration
+     |      
+     |      On Success returns dict with the value :
+     |         'timezone_localTime':    '1394527011'
+     |         'timezone_olsonName':    'UTC/GMT',
+     |         'timezone_status':       '2'
+     |         'timezone_utcOffset':    'UTC'
+     |         'timezone_utcTime':      '1394527011'
+     |         'timezone_status':       'success'
+     |  
+     |  get_uploader()
+     |      gets current uploaders config
+     |      
+     |      On Success returns dict with the values (example):
+     |          "uploader_timestamp" :  "1394503703"
+     |          "uploader_provider" :   "bidgely"
+     |          "uploader_protocol" :   "https"
+     |          "uploader_hostname" :   "api.bidgely.com"
+     |          "uploader_url" :        "/v1/users/44441b47-1b9a-4a65-8e8c-0efefe05bb88/homes/1/gateways/1"
+     |          "uploader_port" :       "0"
+     |          "uploader_auth_code" :  "44441b47-1b9a-4a65-8e8c-0efefe05bb88"
+     |          "uploader_email" :      ""
+     |          "uploader_user_id" :    ""
+     |          "uploader_password" :   ""
+     |          "uploader_enabled" :    "Y"
+     |      
+     |      See also set_cloud() to set current uploader cloud config
+     |  
+     |  get_uploaders(self)
+     |      gets list of uploaders for Web UI
+     |      
+     |      On Success returns dict with the values (example):
+     |          'uploader[0]':          'none'
+     |          'uploader[1]':          'bidgely'
+     |          'uploader_name[0]':     'None'
+     |          'uploader_name[1]':     'Bidgely Inc.'
+     |  
+     |  get_usage_data(self)
+     |  
+     |  list_devices(self)
+     |  
+     |  set_cloud(self, url, authcode='', email='')
+     |      set cloud Url
+     |      
+     |      args:
+     |          url           Url for uploader
+     |          authcode
+     |          email
+     |      
+     |      See also get_uploader() to retrieve current uploader cloud config
+     |  
+     |  set_fast_poll(self, macid=None, frequency='0x04', duration='0xFF')
+     |      Send the SET_FAST_POLL command
+     |      set the fast poll mode on the meter
+     |      
+     |      args:
+     |          MacId   16 hex digits, MAC addr of EAGLE ZigBee radio
+     |          Frequency       0x01 - 0xFF     Freq to poll meter, in seconds
+     |          Duration        0x00 - 0x0F     Duration of fast poll mode, in minutes (max 15)
+     |  
+     |  set_message_read(self)
+     |      On Success returns dict with the values :
+     |          'remote_management_status' :    'success'
+     |  
+     |  set_price(self, price)
+     |      Set price manualy
+     |      
+     |      args:
+     |          price           Price/kWh
+     |      
+     |      On Success returns dict with value :
+     |          'set_price_status':     'success'
+     |  
+     |  set_price_auto(self)
+     |      Set Price from Meter
+     |      
+     |      On Success returns dict with value :
+     |          'set_price_status':     'success'
+     |  
+     |  set_remote_management(self, macid=None, status='on')
+     |      set_remote_management
+     |      enabling ssh & vpn
+     |      
+     |      args:
+     |          status          on|off
+     |      
+     |      On Success returns dict with value :
+     |          'remote_management_status':     'success'
+     |  
+     |  set_time_source(self, macid=None, source=None)
+     |      set_time_source
+     |      set time source
+     |      
+     |      args:
+     |          source          meter|internet
+     |      
+     |      On Success returns dict with value :
+     |          'set_time_source_status':       u'success'
+     |      
+     |      On Error returns dict with value :
+     |          'set_time_source_status':       'invalid source name'
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class RainEagleResponseError(exceptions.RuntimeError)
+     |  General exception for responce errors
+     |  from Rainforest Automation EAGLE (RFA-Z109)
+     |  
+     |  Method resolution order:
+     |      RainEagleResponseError
+     |      exceptions.RuntimeError
+     |      exceptions.StandardError
+     |      exceptions.Exception
+     |      exceptions.BaseException
+     |      __builtin__.object
+     |  
+     |  Data descriptors defined here:
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from exceptions.RuntimeError:
+     |  
+     |  __init__(...)
+     |      x.__init__(...) initializes x; see help(type(x)) for signature
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from exceptions.RuntimeError:
+     |  
+     |  __new__ = <built-in method __new__ of type object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from exceptions.BaseException:
+     |  
+     |  __delattr__(...)
+     |      x.__delattr__('name') <==> del x.name
+     |  
+     |  __getattribute__(...)
+     |      x.__getattribute__('name') <==> x.name
+     |  
+     |  __getitem__(...)
+     |      x.__getitem__(y) <==> x[y]
+     |  
+     |  __getslice__(...)
+     |      x.__getslice__(i, j) <==> x[i:j]
+     |      
+     |      Use of negative indices is not supported.
+     |  
+     |  __reduce__(...)
+     |  
+     |  __repr__(...)
+     |      x.__repr__() <==> repr(x)
+     |  
+     |  __setattr__(...)
+     |      x.__setattr__('name', value) <==> x.name = value
+     |  
+     |  __setstate__(...)
+     |  
+     |  __str__(...)
+     |      x.__str__() <==> str(x)
+     |  
+     |  __unicode__(...)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from exceptions.BaseException:
+     |  
+     |  __dict__
+     |  
+     |  args
+     |  
+     |  message
+
+DATA
+    __all__ = ['Eagle', 'RainEagleResponseError', 'to_epoch_1970, to_epoch...
+    __author__ = 'Peter Shipley <peter.shipley@gmail.com>'
+    __copyright__ = 'Copyright (C) 2014 Peter Shipley'
+    __license__ = 'BSD'
+
+AUTHOR
+    Peter Shipley <peter.shipley@gmail.com>
+
+

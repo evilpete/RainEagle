@@ -10,14 +10,15 @@ if sys.hexversion < 0x20703f0 :
 __revision__ = "$Id: 20140301 $"
 __version__ = '0.1.20140301'
 __author__ = 'Peter Shipley <peter.shipley@gmail.com>'
-__copyright__ = "Copyright (C) 2014 Peter Shipley" 
+__copyright__ = "Copyright (C) 2014 Peter Shipley"
 __license__ = "BSD"
 
 
-from EagleClass import Eagle
+import EagleClass
+from EagleClass import Eagle, RainEagleResponseError, to_epoch_1970, to_epoch_2000
 #from RainEagle.EagleClass import Eagle
 
-__all__ = ['Eagle']
+__all__ = ['Eagle', 'RainEagleResponseError', 'to_epoch_1970', 'to_epoch_2000']
 
 
 
