@@ -33,11 +33,11 @@ setup(
     author='Peter Shipley',
     author_email='Peter.Shipley@gmail.com',
     packages=find_packages(),
-    scripts=[ 'binbin/get_meter_status.py', 'bin/plot_power.py' ]
-    data_files=[
+    scripts=[ 'bin/meter_status.py', 'bin/plot_power.py' ],
+    data_files=[ ],
 #	('examples', ['bin/isy_find.py', 'bin/isy_progs.py',
 #		'bin/isy_log.py', 'bin/isy_net_wol.py']),
-        ('bin', ['bin/isy_nodes.py', 'bin/isy_var.py']) ],
+#        ('bin', ['bin/isy_nodes.py', 'bin/isy_var.py']) ],
     url='https://github.com/evilpete/RainEagle',
     license='BSD',
     description='Python Class for utilizing the Rainforest Automation Eagle ( RFA-Z109 ) socket API.',

@@ -1,0 +1,105 @@
+#!/usr/local/bin/python2.7
+"""
+    A simple script get current meter values
+"""
+	 
+__author__ = "Peter Shipley"
+
+import sys
+sys.path.append('/usr/home/shipley/Projects/Eagle') # temp
+
+
+# import RainEagle
+from RainEagle import Eagle, to_epoch_1970
+import time
+from pprint import pprint
+
+debug = 0
+
+def main() :
+    eg = Eagle( debug=debug , addr="10.1.1.39")
+    # timeout=45,
+
+    r = eg.get_device_data()
+
+    print_instantdemand( r['InstantaneousDemand'])
+    print
+
+    print_currentsummation(r['CurrentSummation'])
+    print
+
+    exit(0)
+
+def twos_comp(val, bits=32):
+    """compute the 2's compliment of int value val"""
+    if( (val&(1<<(bits-1))) != 0 ):
+	val = val - (1<<bits)
+    return val
+
+def print_currentsummation(cs) :
+
+    multiplier = int(cs['Multiplier'], 16)
+    divisor = int(cs['Divisor'], 16)
+    delivered = int(cs['SummationDelivered'], 16)
+    received = int(cs['SummationReceived'], 16)
+
+    if multiplier == 0 :
+	multiplier = 1
+
+    if divisor == 0 :
+	divisor = 1
+
+    reading_received = received * multiplier / float (divisor)
+    reading_delivered = delivered * multiplier / float (divisor)
+
+    time_stamp = to_epoch_1970(cs['TimeStamp'])
+
+    print "{0:s} : ".format(time.asctime(time.localtime(time_stamp)))
+    print "\tReceived  = {0:{width}.3f} Kw".format(reading_received, width=10)
+    print "\tDelivered = {0:{width}.3f} Kw".format(reading_delivered, width=10)
+    print "\t\t{0:{width}.3f} Kw".format( (reading_delivered - reading_received), width=14)
+
+
+#    print "{0}\t{1:.4f}\t{2:0.4f}\t{3:.4f}".format(
+#	time.strftime("%Y-%m-%d %H:%M:%S", time_struct), 
+#	reading_received, 
+#	reading_delivered, 
+#	(reading_delivered - reading_received) )
+
+
+def print_instantdemand(idemand) :
+
+    time_stamp = to_epoch_1970(idemand['TimeStamp'])
+
+    multiplier = int(idemand['Multiplier'], 16)
+    divisor = int(idemand['Divisor'], 16)
+
+#    demand = twos_comp(int(idemand['Demand'], 16))
+
+    demand = int(idemand['Demand'], 16)
+
+    if demand > 0x7FFFFFFF:
+	demand -= 0x100000000
+
+    if multiplier == 0 :
+	multiplier = 1
+
+    if divisor == 0 :
+	divisor = 1
+
+    reading = (demand * multiplier) /  float (divisor )
+
+    print "{0:s} : ".format(time.asctime(time.localtime(time_stamp)))
+    print "\tDemand    = {0:{width}.3f} Kw".format(reading, width=10)
+    print "\tAmps      = {0:{width}.3f}".format( ((reading * 1000) / 240), width=10 )
+
+
+# 
+if __name__ == "__main__":
+    # import __main__
+    # print(__main__.__file__) 
+    # print("syntax ok") 
+    main()
+    exit(0) 
+
+

@@ -1,5 +1,4 @@
 
-
 __author__ = 'Peter Shipley <peter.shipley@gmail.com>'
 __copyright__ = "Copyright (C) 2014 Peter Shipley"
 __license__ = "BSD"
@@ -20,11 +19,10 @@ from warnings import warn
 from pprint import pprint
 
 
-api_arg_format = {
-
-}
+# api_arg_format = { }
 
 __all__ = ['Eagle', 'RainEagleResponseError', 'to_epoch_1970, to_epoch_2000']
+
 
 class RainEagleResponseError(RuntimeError):
     """General exception for responce errors
@@ -33,13 +31,12 @@ class RainEagleResponseError(RuntimeError):
     pass
 
 
-
 def to_epoch_2000(t) :
     """ converts time stored as
         to unix's epoch of 1970
         offset in seconds from "Jan 1 00:00:00 2000"
     """
-    if isinstance(t, time.struct_time ) :
+    if isinstance(t, time.struct_time) :
         t = time.mktime(t)
     return t - 946684800
 
@@ -49,7 +46,7 @@ def to_epoch_1970(t) :
         offset in seconds from "Jan 1 00:00:00 2000"
         to unix's epoch of 1970
     """
-    if isinstance(t, (int, long, float) ) :
+    if isinstance(t, (int, long, float)) :
         return t + 946684800
     if isinstance(t, str) and t.startswith('0x') :
         return 946684800 + int(t, 16)
@@ -61,7 +58,7 @@ def _et2d(et) :
         converts an ETree to a Dict Tree
         lists are created for duplicate tag
 
-        if there are multiple XML of the name name
+        if there are multiple XML of the same name
         an list array is used
         attrib tags are converted to "tag_name" + "attrib_name"
 
@@ -98,7 +95,7 @@ def _et2d(et) :
     return d
 
 
-def twos_comp(val, bits=32):
+def _twos_comp(val, bits=32):
     """compute the 2's compliment of int value val"""
     if( (val&(1<<(bits-1))) != 0 ):
         val = val - (1<<bits)
@@ -121,8 +118,9 @@ def _tohex(n, width=8) :
     # add two for the "0x"
     width += 2
 
-    if (i > 2147483647) or ( i < -2147483648 ) :
-        warn("_tohex : signed int to large (" + str(n) + ")\n", RuntimeWarning, stacklevel=2)
+    if (i > 2147483647) or (i < -2147483648) :
+        warn("_tohex : signed int to large (" + str(n) + ")\n",
+                        RuntimeWarning, stacklevel=2)
 
     if i < 0 :
         i += 0x100000000
@@ -140,6 +138,7 @@ class Eagle(object) :
             addr        address of device
             port        port on device (default 5002)
             getmac      connect to device at start up and get macid (default true)
+            timeout     TCP socket timeout
 
         Currently there is very little error handling ( if any at all )
     """
@@ -182,7 +181,7 @@ class Eagle(object) :
             print "comm_responce =", comm_responce
         if comm_responce is None:
             raise RainEagleResponseError("list_devices : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         if self.macid is None :
             self.macid = rv['DeviceInfo']['DeviceMacId']
@@ -196,7 +195,7 @@ class Eagle(object) :
         comm_responce = self._send_soc_comm("get_device_data", MacId=macid)
         if comm_responce is None:
             raise RainEagleResponseError("get_device_data : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
@@ -214,12 +213,12 @@ class Eagle(object) :
                 MacId=macid)
         if comm_responce is None:
             raise RainEagleResponseError("get_instantaneous_demand : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
     # 11
-    def get_demand_values(self, macid=None, interval="hour", frequency=None ) :
+    def get_demand_values(self, macid=None, interval="hour", frequency=None) :
         """ Send the GET_DEMAND_VALUES command
             get a series of instantaneous demand values
 
@@ -238,7 +237,7 @@ class Eagle(object) :
         comm_responce = self._send_soc_comm("get_demand_values", **kwargs)
         if comm_responce is None:
             raise RainEagleResponseError("get_demand_values : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
@@ -256,10 +255,10 @@ class Eagle(object) :
         if interval not in ['day', 'week', 'month', 'year'] :
             raise ValueError("get_summation_values interval must be 'day', 'week', 'month' or 'year'")
         comm_responce = self._send_soc_comm("get_summation_values",
-            MacId=macid, Interval=interval )
+            MacId=macid, Interval=interval)
         if comm_responce is None:
             raise RainEagleResponseError("get_summation_values : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
@@ -282,7 +281,7 @@ class Eagle(object) :
             MacId=macid, Frequency=frequency, Duration=duration)
         if comm_responce is None:
             raise RainEagleResponseError("set_fast_poll : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
@@ -299,13 +298,13 @@ class Eagle(object) :
         comm_responce = self._send_soc_comm("get_fast_poll_status", MacId=macid)
         if comm_responce is None:
             return None
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
+
         return rv
 
-
     # 17
-    def get_history_data(self, macid=None, starttime="0x00000000", endtime=None, frequency=None ) :
+    def get_history_data(self, macid=None, starttime="0x00000000", endtime=None, frequency=None) :
         """ Send the GET_HISTORY_DATA command
             get a series of summation values over an interval of time
             ( socket command api )
@@ -327,7 +326,7 @@ class Eagle(object) :
         comm_responce = self._send_soc_comm("get_history_data", **kwargs)
         if comm_responce is None :
             raise RainEagleResponseError("get_history_data : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
@@ -363,13 +362,13 @@ class Eagle(object) :
                 "uploader_user_id" :    ""
                 "uploader_password" :   ""
                 "uploader_enabled" :    "Y"
- 
+
             See also set_cloud() to set current uploader cloud config
         """
         comm_responce = self._send_http_comm("get_uploader")
         return json.loads(comm_responce)
- 
-  
+
+
     def set_message_read(self) :
         """
             On Success returns dict with the values :
@@ -406,27 +405,27 @@ class Eagle(object) :
     def get_usage_data(self) :
         """
             Get current demand usage summation
- 
+
             On Success returns dict with the values (example):
-                'demand' :               '0.4980',
-                'demand_timestamp' :     '1394505386',
-                'demand_units' :         'kW',
-                'message_confirm_required' :     'N',
-                'message_confirmed' :    'N',
-                'message_id' :           '0',
-                'message_priority' :     '',
-                'message_queue' :        active',
-                'message_read' :         'Y',
-                'message_text' :         '',
-                'message_timestamp' :    '946684800',
-                'meter_status' :         'Connected',
-                'price' :                '0.1400',
-                'price_label' :          'Set by User',
-                'price_units' :          '$',
-                'summation_delivered' :  '2667.867',
-                'summation_received' :   '37.283',
-                'summation_units' :      'kWh',
-                'usage_timestamp' :      '1394505386'}
+                'demand' :               '0.4980'
+                'demand_timestamp' :     '1394505386'
+                'demand_units' :         'kW'
+                'message_confirm_required' :     'N'
+                'message_confirmed' :    'N'
+                'message_id' :           '0'
+                'message_priority' :     ''
+                'message_queue' :        active'
+                'message_read' :         'Y'
+                'message_text' :         ''
+                'message_timestamp' :    '946684800'
+                'meter_status' :         'Connected'
+                'price' :                '0.1400'
+                'price_label' :          'Set by User'
+                'price_units' :          '$'
+                'summation_delivered' :  '2667.867'
+                'summation_received' :   '37.283'
+                'summation_units' :      'kWh'
+                'usage_timestamp' :      '1394505386'
 
         """
         comm_responce = self._send_http_comm("get_usage_data")
@@ -434,7 +433,7 @@ class Eagle(object) :
 
 
     def get_historical_data_alt(self, period="day") :
-        """ 
+        """
             get a series of summation values over an interval of time
             ( http command api )
 
@@ -442,48 +441,42 @@ class Eagle(object) :
                 period          day|week|month|year
 
             On Success returns dict with the values (example):
-                'data_period'            'day',
-                'data_size'              '14',
-                'timestamp[0]'           '1394422200',
-                'timestamp[1]'           '1394425800',
-                'timestamp[2]'           '1394429400',
-                'timestamp[3]'           '1394433000',
-                'timestamp[4]'           '1394436600',
-                'timestamp[5]'           '1394440200',
-                'timestamp[6]'           '1394443800',
-                'timestamp[7]'           '1394447400',
-                'timestamp[8]'           '1394451000',
-                'timestamp[9]'           '1394454600',
-                'timestamp[10]'          '1394458200',
-                'timestamp[11]'          '1394461800',
-                'timestamp[12]'          '1394465400',
-                'timestamp[13]'          '1394469000',
-                'value[0]'               '0.429',
-                'value[1]'               '0.426',
-                'value[2]'               '0.422',
-                'value[3]'               '0.627',
-                'value[4]'               '0.735',
-                'value[5]'               '0.193',
-                'value[6]'               '0.026',
-                'value[7]'               '-0.985',
-                'value[8]'               '-1.491',
-                'value[9]'               '-2.196'}
-                'value[11]'              '-1.868',
-                'value[12]'              '-1.330',
-                'value[13]'              '-0.870',
+                'data_period'            'day'
+                'data_size'              '14'
+                'timestamp[0]'           '1394422200'
+                'timestamp[1]'           '1394425800'
+                'timestamp[2]'           '1394429400'
+                'timestamp[3]'           '1394433000'
+                'timestamp[4]'           '1394436600'
+                'timestamp[5]'           '1394440200'
+                'timestamp[6]'           '1394443800'
+                'timestamp[7]'           '1394447400'
+                'timestamp[8]'           '1394451000'
+                'timestamp[9]'           '1394454600'
+                'timestamp[10]'          '1394458200'
+                'timestamp[11]'          '1394461800'
+                'timestamp[12]'          '1394465400'
+                'timestamp[13]'          '1394469000'
+                'value[0]'               '0.429'
+                'value[1]'               '0.426'
+                'value[2]'               '0.422'
+                'value[3]'               '0.627'
+                'value[4]'               '0.735'
+                'value[5]'               '0.193'
+                'value[6]'               '0.026'
+                'value[7]'               '-0.985'
+                'value[8]'               '-1.491'
+                'value[9]'               '-2.196'
+                'value[11]'              '-1.868'
+                'value[12]'              '-1.330'
+                'value[13]'              '-0.870'
 
         """
-        if period not in ['day', 'week', 'month', 'year'] : 
+        if period not in ['day', 'week', 'month', 'year'] :
             raise ValueError("get_historical_data_alt period must be one of day|week|month|year")
         comm_responce = self._send_http_comm("get_historical_data", Period=period)
         return json.loads(comm_responce)
 
-
-    def get_usage_data(self) :
-        """
-        """
-        comm_responce = self._send_http_comm("get_usage_data")
-        return json.loads(comm_responce)
 
     def get_setting_data(self) :
         """
@@ -528,12 +521,11 @@ class Eagle(object) :
 
             On Success returns dict with the value :
                'timezone_localTime':    '1394527011'
-               'timezone_olsonName':    'UTC/GMT',
+               'timezone_olsonName':    'UTC/GMT'
                'timezone_status':       '2'
                'timezone_utcOffset':    'UTC'
                'timezone_utcTime':      '1394527011'
                'timezone_status':       'success'
-
 
         """
         comm_responce = self._send_http_comm("get_timezone")
@@ -544,7 +536,7 @@ class Eagle(object) :
             get time source for device
 
             On Success returns dict with value 'internet' or 'meter' :
-               'time_source':           'internet'}
+               'time_source':           'internet'
         """
         comm_responce = self._send_http_comm("get_time_source")
         return json.loads(comm_responce)
@@ -592,10 +584,10 @@ class Eagle(object) :
             get price for kWh
 
             On Success returns (example):
-                price':         '0.1300',
+                price':         '0.1300'
                 price_label':   'Set by User' or '--'
-                price_timestamp': '1394524458',
-                price_units':   '$'}
+                price_timestamp': '1394524458'
+                price_units':   '$'
 
             returns empty dict on Error
         """
@@ -616,21 +608,22 @@ class Eagle(object) :
         if isinstance(price, str) and price.startswith('$') :
             price = float(price.lstrip('$'))
 
-        if not isinstance(price, (int, long, float) ) :
+        if not isinstance(price, (int, long, float)) :
             raise ValueError("set_price price arg must me a int, long or float")
-        if ( price <= 0 ):
+        if (price <= 0):
             raise ValueError("set_price price arg greater then 0")
 
         trailing_digits     = 0
         multiplier          = 1
-        while (((price * multiplier) != (floor(price * multiplier))) and (trailing_digits < 7) ) :
+        while (((price * multiplier) != (floor(price * multiplier))) and (trailing_digits < 7)) :
             trailing_digits += 1
             multiplier *= 10
 
-        price_adj = "{:#x}".format( int(price * multiplier) )
-        tdigits = "{:#x}".format(  trailing_digits )
+        price_adj = "{:#x}".format(int(price * multiplier))
+        tdigits = "{:#x}".format(trailing_digits)
 
-        comm_responce = self._send_http_comm("set_price", Price=price_adj, TrailingDigits=tdigits)
+        comm_responce = self._send_http_comm("set_price",
+                        Price=price_adj, TrailingDigits=tdigits)
         return json.loads(comm_responce)
 
 
@@ -642,8 +635,8 @@ class Eagle(object) :
                 'set_price_status':     'success'
         """
         comm_responce = self._send_http_comm("set_price",
-            Price="0xFFFFFFFF",
-            TrailingDigits="0x00")
+                    Price="0xFFFFFFFF",
+                    TrailingDigits="0x00")
         return json.loads(comm_responce)
 
 #    def set_multiplier_divisor(self, multiplier=1, divisor=1) :
@@ -669,7 +662,6 @@ class Eagle(object) :
 #       """
 #       comm_responce = self._send_http_comm("disconnect_meter")
 #       return json.loads(comm_responce)
-
 
 
     def cloud_reset(self) :
@@ -722,22 +714,19 @@ class Eagle(object) :
             password = ""
 
         comm_responce = self._send_http_comm("set_cloud",
-            Provider="manual",
-            Protocol=protocol, HostName=hostname,
-            Url=url, Port=port,
-            AuthCode=authcode, Email=email,
-            UserId=userid, Password=password)
+                    Provider="manual",
+                    Protocol=protocol, HostName=hostname,
+                    Url=url, Port=port,
+                    AuthCode=authcode, Email=email,
+                    UserId=userid, Password=password)
 
         return json.loads(comm_responce)
-
-
-
-
 
 # Support functions
 
     def _connect(self) :
-        self.soc = socket.create_connection( (self.addr, self.port), self.timeout)
+        self.soc = socket.create_connection(
+                (self.addr, self.port), self.timeout)
 
     def _disconnect(self):
         try :
@@ -746,7 +735,6 @@ class Eagle(object) :
                 self.soc = False
         except IOError :
             pass
-
 
     def _send_http_comm(self, cmd, **kwargs):
 
