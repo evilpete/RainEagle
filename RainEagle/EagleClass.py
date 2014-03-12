@@ -20,9 +20,7 @@ from warnings import warn
 from pprint import pprint
 
 
-api_arg_format = {
-
-}
+# api_arg_format = { }
 
 __all__ = ['Eagle', 'RainEagleResponseError', 'to_epoch_1970, to_epoch_2000']
 
@@ -61,7 +59,7 @@ def _et2d(et) :
         converts an ETree to a Dict Tree
         lists are created for duplicate tag
 
-        if there are multiple XML of the name name
+        if there are multiple XML of the same name
         an list array is used
         attrib tags are converted to "tag_name" + "attrib_name"
 
@@ -98,7 +96,7 @@ def _et2d(et) :
     return d
 
 
-def twos_comp(val, bits=32):
+def _twos_comp(val, bits=32):
     """compute the 2's compliment of int value val"""
     if( (val&(1<<(bits-1))) != 0 ):
         val = val - (1<<bits)
@@ -140,6 +138,7 @@ class Eagle(object) :
             addr        address of device
             port        port on device (default 5002)
             getmac      connect to device at start up and get macid (default true)
+            timeout     TCP socket timeout
 
         Currently there is very little error handling ( if any at all )
     """
@@ -408,25 +407,25 @@ class Eagle(object) :
             Get current demand usage summation
  
             On Success returns dict with the values (example):
-                'demand' :               '0.4980',
-                'demand_timestamp' :     '1394505386',
-                'demand_units' :         'kW',
-                'message_confirm_required' :     'N',
-                'message_confirmed' :    'N',
-                'message_id' :           '0',
-                'message_priority' :     '',
-                'message_queue' :        active',
-                'message_read' :         'Y',
-                'message_text' :         '',
-                'message_timestamp' :    '946684800',
-                'meter_status' :         'Connected',
-                'price' :                '0.1400',
-                'price_label' :          'Set by User',
-                'price_units' :          '$',
-                'summation_delivered' :  '2667.867',
-                'summation_received' :   '37.283',
-                'summation_units' :      'kWh',
-                'usage_timestamp' :      '1394505386'}
+                'demand' :               '0.4980'
+                'demand_timestamp' :     '1394505386'
+                'demand_units' :         'kW'
+                'message_confirm_required' :     'N'
+                'message_confirmed' :    'N'
+                'message_id' :           '0'
+                'message_priority' :     ''
+                'message_queue' :        active'
+                'message_read' :         'Y'
+                'message_text' :         ''
+                'message_timestamp' :    '946684800'
+                'meter_status' :         'Connected'
+                'price' :                '0.1400'
+                'price_label' :          'Set by User'
+                'price_units' :          '$'
+                'summation_delivered' :  '2667.867'
+                'summation_received' :   '37.283'
+                'summation_units' :      'kWh'
+                'usage_timestamp' :      '1394505386'
 
         """
         comm_responce = self._send_http_comm("get_usage_data")
@@ -442,35 +441,35 @@ class Eagle(object) :
                 period          day|week|month|year
 
             On Success returns dict with the values (example):
-                'data_period'            'day',
-                'data_size'              '14',
-                'timestamp[0]'           '1394422200',
-                'timestamp[1]'           '1394425800',
-                'timestamp[2]'           '1394429400',
-                'timestamp[3]'           '1394433000',
-                'timestamp[4]'           '1394436600',
-                'timestamp[5]'           '1394440200',
-                'timestamp[6]'           '1394443800',
-                'timestamp[7]'           '1394447400',
-                'timestamp[8]'           '1394451000',
-                'timestamp[9]'           '1394454600',
-                'timestamp[10]'          '1394458200',
-                'timestamp[11]'          '1394461800',
-                'timestamp[12]'          '1394465400',
-                'timestamp[13]'          '1394469000',
-                'value[0]'               '0.429',
-                'value[1]'               '0.426',
-                'value[2]'               '0.422',
-                'value[3]'               '0.627',
-                'value[4]'               '0.735',
-                'value[5]'               '0.193',
-                'value[6]'               '0.026',
-                'value[7]'               '-0.985',
-                'value[8]'               '-1.491',
-                'value[9]'               '-2.196'}
-                'value[11]'              '-1.868',
-                'value[12]'              '-1.330',
-                'value[13]'              '-0.870',
+                'data_period'            'day'
+                'data_size'              '14'
+                'timestamp[0]'           '1394422200'
+                'timestamp[1]'           '1394425800'
+                'timestamp[2]'           '1394429400'
+                'timestamp[3]'           '1394433000'
+                'timestamp[4]'           '1394436600'
+                'timestamp[5]'           '1394440200'
+                'timestamp[6]'           '1394443800'
+                'timestamp[7]'           '1394447400'
+                'timestamp[8]'           '1394451000'
+                'timestamp[9]'           '1394454600'
+                'timestamp[10]'          '1394458200'
+                'timestamp[11]'          '1394461800'
+                'timestamp[12]'          '1394465400'
+                'timestamp[13]'          '1394469000'
+                'value[0]'               '0.429'
+                'value[1]'               '0.426'
+                'value[2]'               '0.422'
+                'value[3]'               '0.627'
+                'value[4]'               '0.735'
+                'value[5]'               '0.193'
+                'value[6]'               '0.026'
+                'value[7]'               '-0.985'
+                'value[8]'               '-1.491'
+                'value[9]'               '-2.196'
+                'value[11]'              '-1.868'
+                'value[12]'              '-1.330'
+                'value[13]'              '-0.870'
 
         """
         if period not in ['day', 'week', 'month', 'year'] : 
@@ -478,12 +477,6 @@ class Eagle(object) :
         comm_responce = self._send_http_comm("get_historical_data", Period=period)
         return json.loads(comm_responce)
 
-
-    def get_usage_data(self) :
-        """
-        """
-        comm_responce = self._send_http_comm("get_usage_data")
-        return json.loads(comm_responce)
 
     def get_setting_data(self) :
         """
@@ -528,7 +521,7 @@ class Eagle(object) :
 
             On Success returns dict with the value :
                'timezone_localTime':    '1394527011'
-               'timezone_olsonName':    'UTC/GMT',
+               'timezone_olsonName':    'UTC/GMT'
                'timezone_status':       '2'
                'timezone_utcOffset':    'UTC'
                'timezone_utcTime':      '1394527011'
@@ -544,7 +537,7 @@ class Eagle(object) :
             get time source for device
 
             On Success returns dict with value 'internet' or 'meter' :
-               'time_source':           'internet'}
+               'time_source':           'internet'
         """
         comm_responce = self._send_http_comm("get_time_source")
         return json.loads(comm_responce)
@@ -592,10 +585,10 @@ class Eagle(object) :
             get price for kWh
 
             On Success returns (example):
-                price':         '0.1300',
+                price':         '0.1300'
                 price_label':   'Set by User' or '--'
-                price_timestamp': '1394524458',
-                price_units':   '$'}
+                price_timestamp': '1394524458'
+                price_units':   '$'
 
             returns empty dict on Error
         """
@@ -729,10 +722,6 @@ class Eagle(object) :
             UserId=userid, Password=password)
 
         return json.loads(comm_responce)
-
-
-
-
 
 # Support functions
 
