@@ -1,5 +1,4 @@
 
-
 __author__ = 'Peter Shipley <peter.shipley@gmail.com>'
 __copyright__ = "Copyright (C) 2014 Peter Shipley"
 __license__ = "BSD"
@@ -24,6 +23,7 @@ from pprint import pprint
 
 __all__ = ['Eagle', 'RainEagleResponseError', 'to_epoch_1970, to_epoch_2000']
 
+
 class RainEagleResponseError(RuntimeError):
     """General exception for responce errors
         from Rainforest Automation EAGLE (RFA-Z109)
@@ -31,13 +31,12 @@ class RainEagleResponseError(RuntimeError):
     pass
 
 
-
 def to_epoch_2000(t) :
     """ converts time stored as
         to unix's epoch of 1970
         offset in seconds from "Jan 1 00:00:00 2000"
     """
-    if isinstance(t, time.struct_time ) :
+    if isinstance(t, time.struct_time) :
         t = time.mktime(t)
     return t - 946684800
 
@@ -47,7 +46,7 @@ def to_epoch_1970(t) :
         offset in seconds from "Jan 1 00:00:00 2000"
         to unix's epoch of 1970
     """
-    if isinstance(t, (int, long, float) ) :
+    if isinstance(t, (int, long, float)) :
         return t + 946684800
     if isinstance(t, str) and t.startswith('0x') :
         return 946684800 + int(t, 16)
@@ -119,8 +118,9 @@ def _tohex(n, width=8) :
     # add two for the "0x"
     width += 2
 
-    if (i > 2147483647) or ( i < -2147483648 ) :
-        warn("_tohex : signed int to large (" + str(n) + ")\n", RuntimeWarning, stacklevel=2)
+    if (i > 2147483647) or (i < -2147483648) :
+        warn("_tohex : signed int to large (" + str(n) + ")\n",
+                        RuntimeWarning, stacklevel=2)
 
     if i < 0 :
         i += 0x100000000
@@ -181,7 +181,7 @@ class Eagle(object) :
             print "comm_responce =", comm_responce
         if comm_responce is None:
             raise RainEagleResponseError("list_devices : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         if self.macid is None :
             self.macid = rv['DeviceInfo']['DeviceMacId']
@@ -195,7 +195,7 @@ class Eagle(object) :
         comm_responce = self._send_soc_comm("get_device_data", MacId=macid)
         if comm_responce is None:
             raise RainEagleResponseError("get_device_data : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
@@ -213,12 +213,12 @@ class Eagle(object) :
                 MacId=macid)
         if comm_responce is None:
             raise RainEagleResponseError("get_instantaneous_demand : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
     # 11
-    def get_demand_values(self, macid=None, interval="hour", frequency=None ) :
+    def get_demand_values(self, macid=None, interval="hour", frequency=None) :
         """ Send the GET_DEMAND_VALUES command
             get a series of instantaneous demand values
 
@@ -237,7 +237,7 @@ class Eagle(object) :
         comm_responce = self._send_soc_comm("get_demand_values", **kwargs)
         if comm_responce is None:
             raise RainEagleResponseError("get_demand_values : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
@@ -255,10 +255,10 @@ class Eagle(object) :
         if interval not in ['day', 'week', 'month', 'year'] :
             raise ValueError("get_summation_values interval must be 'day', 'week', 'month' or 'year'")
         comm_responce = self._send_soc_comm("get_summation_values",
-            MacId=macid, Interval=interval )
+            MacId=macid, Interval=interval)
         if comm_responce is None:
             raise RainEagleResponseError("get_summation_values : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
@@ -281,7 +281,7 @@ class Eagle(object) :
             MacId=macid, Frequency=frequency, Duration=duration)
         if comm_responce is None:
             raise RainEagleResponseError("set_fast_poll : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
@@ -298,13 +298,13 @@ class Eagle(object) :
         comm_responce = self._send_soc_comm("get_fast_poll_status", MacId=macid)
         if comm_responce is None:
             return None
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
+
         return rv
 
-
     # 17
-    def get_history_data(self, macid=None, starttime="0x00000000", endtime=None, frequency=None ) :
+    def get_history_data(self, macid=None, starttime="0x00000000", endtime=None, frequency=None) :
         """ Send the GET_HISTORY_DATA command
             get a series of summation values over an interval of time
             ( socket command api )
@@ -326,7 +326,7 @@ class Eagle(object) :
         comm_responce = self._send_soc_comm("get_history_data", **kwargs)
         if comm_responce is None :
             raise RainEagleResponseError("get_history_data : Null reply")
-        etree = ET.fromstring('<S>' + comm_responce + '</S>' )
+        etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
 
@@ -362,13 +362,13 @@ class Eagle(object) :
                 "uploader_user_id" :    ""
                 "uploader_password" :   ""
                 "uploader_enabled" :    "Y"
- 
+
             See also set_cloud() to set current uploader cloud config
         """
         comm_responce = self._send_http_comm("get_uploader")
         return json.loads(comm_responce)
- 
-  
+
+
     def set_message_read(self) :
         """
             On Success returns dict with the values :
@@ -405,7 +405,7 @@ class Eagle(object) :
     def get_usage_data(self) :
         """
             Get current demand usage summation
- 
+
             On Success returns dict with the values (example):
                 'demand' :               '0.4980'
                 'demand_timestamp' :     '1394505386'
@@ -433,7 +433,7 @@ class Eagle(object) :
 
 
     def get_historical_data_alt(self, period="day") :
-        """ 
+        """
             get a series of summation values over an interval of time
             ( http command api )
 
@@ -472,7 +472,7 @@ class Eagle(object) :
                 'value[13]'              '-0.870'
 
         """
-        if period not in ['day', 'week', 'month', 'year'] : 
+        if period not in ['day', 'week', 'month', 'year'] :
             raise ValueError("get_historical_data_alt period must be one of day|week|month|year")
         comm_responce = self._send_http_comm("get_historical_data", Period=period)
         return json.loads(comm_responce)
@@ -526,7 +526,6 @@ class Eagle(object) :
                'timezone_utcOffset':    'UTC'
                'timezone_utcTime':      '1394527011'
                'timezone_status':       'success'
-
 
         """
         comm_responce = self._send_http_comm("get_timezone")
@@ -609,21 +608,22 @@ class Eagle(object) :
         if isinstance(price, str) and price.startswith('$') :
             price = float(price.lstrip('$'))
 
-        if not isinstance(price, (int, long, float) ) :
+        if not isinstance(price, (int, long, float)) :
             raise ValueError("set_price price arg must me a int, long or float")
-        if ( price <= 0 ):
+        if (price <= 0):
             raise ValueError("set_price price arg greater then 0")
 
         trailing_digits     = 0
         multiplier          = 1
-        while (((price * multiplier) != (floor(price * multiplier))) and (trailing_digits < 7) ) :
+        while (((price * multiplier) != (floor(price * multiplier))) and (trailing_digits < 7)) :
             trailing_digits += 1
             multiplier *= 10
 
-        price_adj = "{:#x}".format( int(price * multiplier) )
-        tdigits = "{:#x}".format(  trailing_digits )
+        price_adj = "{:#x}".format(int(price * multiplier))
+        tdigits = "{:#x}".format(trailing_digits)
 
-        comm_responce = self._send_http_comm("set_price", Price=price_adj, TrailingDigits=tdigits)
+        comm_responce = self._send_http_comm("set_price",
+                        Price=price_adj, TrailingDigits=tdigits)
         return json.loads(comm_responce)
 
 
@@ -635,8 +635,8 @@ class Eagle(object) :
                 'set_price_status':     'success'
         """
         comm_responce = self._send_http_comm("set_price",
-            Price="0xFFFFFFFF",
-            TrailingDigits="0x00")
+                    Price="0xFFFFFFFF",
+                    TrailingDigits="0x00")
         return json.loads(comm_responce)
 
 #    def set_multiplier_divisor(self, multiplier=1, divisor=1) :
@@ -662,7 +662,6 @@ class Eagle(object) :
 #       """
 #       comm_responce = self._send_http_comm("disconnect_meter")
 #       return json.loads(comm_responce)
-
 
 
     def cloud_reset(self) :
@@ -715,18 +714,19 @@ class Eagle(object) :
             password = ""
 
         comm_responce = self._send_http_comm("set_cloud",
-            Provider="manual",
-            Protocol=protocol, HostName=hostname,
-            Url=url, Port=port,
-            AuthCode=authcode, Email=email,
-            UserId=userid, Password=password)
+                    Provider="manual",
+                    Protocol=protocol, HostName=hostname,
+                    Url=url, Port=port,
+                    AuthCode=authcode, Email=email,
+                    UserId=userid, Password=password)
 
         return json.loads(comm_responce)
 
 # Support functions
 
     def _connect(self) :
-        self.soc = socket.create_connection( (self.addr, self.port), self.timeout)
+        self.soc = socket.create_connection(
+                (self.addr, self.port), self.timeout)
 
     def _disconnect(self):
         try :
@@ -735,7 +735,6 @@ class Eagle(object) :
                 self.soc = False
         except IOError :
             pass
-
 
     def _send_http_comm(self, cmd, **kwargs):
 
