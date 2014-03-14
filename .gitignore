@@ -2,8 +2,10 @@
 
 EGG-INFO
 .exrc
+Dump/*
 test.*
 Sav/*
+Tests/*
 Bak/*
 *bak
 

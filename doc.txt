@@ -70,7 +70,7 @@ CLASSES
      |          'gateway_ip_addr':              '10.11.12.13'
      |          'gateway_mac_id':               'D8:D5:B9:00:90:24'
      |  
-     |  get_historical_data_alt(self, period='day')
+     |  get_historical_data(self, period='day')
      |      get a series of summation values over an interval of time
      |      ( http command api )
      |      

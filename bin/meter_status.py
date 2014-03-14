@@ -2,27 +2,60 @@
 """
     A simple script get current meter values
 """
-	 
-__author__ = "Peter Shipley"
 
-import sys
-sys.path.append('/usr/home/shipley/Projects/Eagle') # temp
+__author__ = "Peter Shipley"
+__version__ = "0.1.7"
 
 
 # import RainEagle
 from RainEagle import Eagle, to_epoch_1970
 import time
+import os
+import argparse
 from pprint import pprint
 
 debug = 0
 
+
+def create_parser():
+    parser = argparse.ArgumentParser(
+		    description="print power meter status")
+
+    parser.add_argument("-a", "--address", dest="addr",
+		    default=os.getenv('EAGLE_ADDR', None),
+		    help="hostname or IP device")
+
+    parser.add_argument("-p", "--port", dest="port", type=int,
+		    default=os.getenv('EAGLE_PORT', 5002),
+		    help="command socket port")
+
+    parser.add_argument("-d", "--debug", dest="debug",
+		    default=debug, action="count",
+		    help="print debug info")
+
+    parser.add_argument("-m", "--mac", dest="mac",
+		    help="Eagle radio mac addrress")
+
+    parser.add_argument("-t", "--timeout", dest="timeout",
+		    help="Socket timeout")
+
+    parser.add_argument("-v", '--version', action='version',
+		    version="%(prog)s {0}".format(__version__) )
+
+    return parser
+
+
 def main() :
-    eg = Eagle( debug=debug , addr="10.1.1.39")
+
+    parser = create_parser()
+    args = parser.parse_args()
+
+    eg = Eagle(**vars(args))
     # timeout=45,
 
     r = eg.get_device_data()
 
-    print_instantdemand( r['InstantaneousDemand'])
+    print_instantdemand(r['InstantaneousDemand'])
     print
 
     print_currentsummation(r['CurrentSummation'])
@@ -30,11 +63,13 @@ def main() :
 
     exit(0)
 
+
 def twos_comp(val, bits=32):
     """compute the 2's compliment of int value val"""
     if( (val&(1<<(bits-1))) != 0 ):
-	val = val - (1<<bits)
+        val = val - (1<<bits)
     return val
+
 
 def print_currentsummation(cs) :
 
@@ -44,32 +79,24 @@ def print_currentsummation(cs) :
     received = int(cs['SummationReceived'], 16)
 
     if multiplier == 0 :
-	multiplier = 1
+        multiplier = 1
 
     if divisor == 0 :
-	divisor = 1
+        divisor = 1
 
     reading_received = received * multiplier / float (divisor)
     reading_delivered = delivered * multiplier / float (divisor)
 
-    time_stamp = to_epoch_1970(cs['TimeStamp'])
-
-    print "{0:s} : ".format(time.asctime(time.localtime(time_stamp)))
+    if 'TimeStamp' in cs :
+        time_stamp = to_epoch_1970(cs['TimeStamp'])
+        print "{0:s} : ".format(time.asctime(time.localtime(time_stamp)))
     print "\tReceived  = {0:{width}.3f} Kw".format(reading_received, width=10)
     print "\tDelivered = {0:{width}.3f} Kw".format(reading_delivered, width=10)
     print "\t\t{0:{width}.3f} Kw".format( (reading_delivered - reading_received), width=14)
 
 
-#    print "{0}\t{1:.4f}\t{2:0.4f}\t{3:.4f}".format(
-#	time.strftime("%Y-%m-%d %H:%M:%S", time_struct), 
-#	reading_received, 
-#	reading_delivered, 
-#	(reading_delivered - reading_received) )
-
-
 def print_instantdemand(idemand) :
 
-    time_stamp = to_epoch_1970(idemand['TimeStamp'])
 
     multiplier = int(idemand['Multiplier'], 16)
     divisor = int(idemand['Divisor'], 16)
@@ -79,27 +106,30 @@ def print_instantdemand(idemand) :
     demand = int(idemand['Demand'], 16)
 
     if demand > 0x7FFFFFFF:
-	demand -= 0x100000000
+        demand -= 0x100000000
 
     if multiplier == 0 :
-	multiplier = 1
+        multiplier = 1
 
     if divisor == 0 :
-	divisor = 1
+        divisor = 1
 
-    reading = (demand * multiplier) /  float (divisor )
+    reading = (demand * multiplier) / float (divisor)
 
-    print "{0:s} : ".format(time.asctime(time.localtime(time_stamp)))
+    if 'TimeStamp' in idemand :
+        time_stamp = to_epoch_1970(idemand['TimeStamp'])
+        print "{0:s} : ".format(time.asctime(time.localtime(time_stamp)))
+
     print "\tDemand    = {0:{width}.3f} Kw".format(reading, width=10)
-    print "\tAmps      = {0:{width}.3f}".format( ((reading * 1000) / 240), width=10 )
+    print "\tAmps      = {0:{width}.3f}".format( ((reading * 1000) / 240), width=10)
 
 
-# 
+#
 if __name__ == "__main__":
     # import __main__
-    # print(__main__.__file__) 
-    # print("syntax ok") 
+    # print(__main__.__file__)
+    # print("syntax ok")
     main()
-    exit(0) 
+    exit(0)
 
 

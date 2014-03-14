@@ -29,7 +29,7 @@ class install_scripts_and_symlinks(install_scripts):
 
 setup(
     name='RainEagle',
-    version='0.1.6',
+    version='0.1.7',
     author='Peter Shipley',
     author_email='Peter.Shipley@gmail.com',
     packages=find_packages(),

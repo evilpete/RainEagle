@@ -27,16 +27,14 @@ set grid
 set key off
 set pointsize 0.5
 
-# 2014-03-09 13:24:21     24.2220 0.0970  2649.2700       0.0000
 set xtics rotate
 
 set xtics 3600
 set xdata  time
 set timefmt "%Y-%m-%d %H:%M:%S"
 set format x "%a %b %d %H:%M"
-#set xrange [ "2014-03-04 00:00:00" :  ] 
-set xrange [ "2014-03-04 00:00:00" :  ] 
 
+# set xrange [ "2014-03-04 00:00:00" :  ] 
 
 set style data lines 
 set autoscale y 

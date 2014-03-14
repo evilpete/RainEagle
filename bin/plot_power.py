@@ -2,12 +2,10 @@
 """
     A simple script to generate guuplot data from meter history
 """
-	 
+
 __author__ = "Peter Shipley"
+__version__ = "0.1.7"
 
-
-import sys
-sys.path.append('/usr/home/shipley/Projects/Eagle') # temp
 
 import RainEagle
 import time
@@ -22,115 +20,95 @@ max_delta_received = 0
 max_delta_delivered = 0
 day_delta_received = 0
 day_delta_delivered = 0
-curr_day=-1
+curr_day = -1
+
 
 def main(eg) :
-    # print_header()
     print_data(eg)
-    # print_footer()
     exit(0)
 
-def print_header() :
-    print """
-set terminal png size 2600,500
-set datafile separator "\t"
-set xlabel "time"
-set ylabel "power"
-set grid
-set key off
-set pointsize 0.5 
-set xtics 3600 
-set xdata  time      
-set timefmt "%Y-%m-%d %H:%M:%S"
-set format x "%a %b %d %H:%M"
-#set xrange [ "2014-03-04 00:00:00" :  ]
-# set xrange [ "2014-03-04 00:00:00" : "2014-03-09 17:20:00" ] 
-set style data lines 
-set autoscale y
-set title "Power Use"
-set output "poweruse.png"
-plot "-" using 1:3 t "inbound" w lines, "-" using 1:5 t "outbound"
-"""
-
-def print_footer() :
-    pass
 
 def print_data(eg) :
     rh = eg.get_history_data()
-    #+ # endtime=None, frequency=None ) :
+    #+ # endtime=None, frequency=None) :
 
     for dat in rh['HistoryData']['CurrentSummation'] :
-	print_currentsummation(dat)
+        print_currentsummation(dat)
 
-    print "# day_delta_received={0:0.4f}\tday_delta_delivered={1:0.4f} : {2:0.4f}".format(day_delta_received, day_delta_delivered, ( day_delta_delivered - day_delta_received ) )
-    print "# max_delta_received={0:0.4f}\tmax_delta_delivered={1:0.4f}".format(max_delta_received, max_delta_delivered)
+    print "# day_delta_received={0:0.4f}\t" \
+        + " day_delta_delivered={1:0.4f} : {2:0.4f}".format(
+            day_delta_received,
+            day_delta_delivered,
+            (day_delta_delivered - day_delta_received))
+    print "# max_delta_received={0:0.4f}\t" \
+        + " max_delta_delivered={1:0.4f}".format(
+            max_delta_received, max_delta_delivered)
+
 
 def print_currentsummation(cs) :
     global last_delivered
     global last_received
 
-    global max_delta_received 
+    global max_delta_received
     global max_delta_delivered
-    global day_delta_received 
+    global day_delta_received
     global day_delta_delivered
     global curr_day
 
     time_stamp = to_epoch_1970(cs['TimeStamp'])
 
-    multiplier=int(cs['Multiplier'], 16)
-    divisor=int(cs['Divisor'], 16)
-    delivered=int(cs['SummationDelivered'], 16)
-    received=int(cs['SummationReceived'], 16)
+    multiplier = int(cs['Multiplier'], 16)
+    divisor = int(cs['Divisor'], 16)
+    delivered = int(cs['SummationDelivered'], 16)
+    received = int(cs['SummationReceived'], 16)
 
     # print "Multiplier=", multiplier, "Divisor=", divisor, "Demand=", demand
- 
+
     if multiplier == 0 :
-	multiplier=1
+        multiplier = 1
 
     if divisor == 0 :
-	divisor=1
+        divisor = 1
 
-    reading_received =  received * multiplier /  float (divisor )
+    reading_received = received * multiplier / float(divisor)
     delta_received = (reading_received - last_received)
     last_received = reading_received
-    if ( delta_received > max_delta_received and delta_received < 1000) :
-	max_delta_received =  delta_received
-	#print "new max_delta_received :", max_delta_received 
+    if (delta_received > max_delta_received and delta_received < 1000) :
+        max_delta_received = delta_received
+        #print "new max_delta_received :", max_delta_received
 
-
-    reading_delivered = delivered * multiplier /  float (divisor )
+    reading_delivered = delivered * multiplier / float(divisor)
     delta_delivered = (reading_delivered - last_delivered)
     last_delivered = reading_delivered
-    if ( delta_delivered > max_delta_delivered and delta_delivered < 1000) :
-	max_delta_delivered =  delta_delivered
-	#print "\t\tnew max_delta_delivered :", max_delta_delivered 
-
-
-
+    if (delta_delivered > max_delta_delivered and delta_delivered < 1000) :
+        max_delta_delivered = delta_delivered
+        #print "\t\tnew max_delta_delivered :", max_delta_delivered
 
     time_struct = time.localtime(time_stamp)
-    if  curr_day != time_struct.tm_mday :
-	curr_day = time_struct.tm_mday
-	print "# day_delta_received={0:0.4f}\tday_delta_delivered={1:0.4f} : {2:0.4f}".format(day_delta_received, day_delta_delivered, ( day_delta_delivered - day_delta_received ) )
-	day_delta_received = 0 
-	day_delta_delivered = 0 
+    if curr_day != time_struct.tm_mday :
+        curr_day = time_struct.tm_mday
+        print "# day_delta_received={0:0.4f}\tday_delta_delivered={1:0.4f}" \
+            + ": {2:0.4f}".format(day_delta_received,
+                                day_delta_delivered,
+                                (day_delta_delivered - day_delta_received))
+        day_delta_received = 0
+        day_delta_delivered = 0
 
     day_delta_received += delta_received
     day_delta_delivered += delta_delivered
 
     print "{0}\t{1:.4f}\t{2:0.4f}\t{3:.4f}\t{4:0.4f}".format(
-	time.strftime("%Y-%m-%d %H:%M:%S", time_struct), 
-	reading_received, 
-	delta_received,
-	reading_delivered, 
-	delta_delivered)
-
+        time.strftime("%Y-%m-%d %H:%M:%S", time_struct),
+        reading_received,
+        delta_received,
+        reading_delivered,
+        delta_delivered)
 
 
 if __name__ == "__main__":
     # import __main__
-    # print(__main__.__file__) 
-    # print("syntax ok") 
-    reagle = RainEagle.Eagle( debug=0 , addr="10.1.1.39")
+    # print(__main__.__file__)
+    # print("syntax ok")
+    reagle = RainEagle.Eagle(debug=0)
     main(reagle)
-    exit(0) 
+    exit(0)

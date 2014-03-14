@@ -2,6 +2,7 @@
 __author__ = 'Peter Shipley <peter.shipley@gmail.com>'
 __copyright__ = "Copyright (C) 2014 Peter Shipley"
 __license__ = "BSD"
+__version__ = "0.1.7"
 
 import socket
 import sys
@@ -14,6 +15,9 @@ from math import floor
 from urlparse import urlparse
 import json
 from warnings import warn
+from distutils.version import LooseVersion
+
+min_fw_ver = "2.0.21"
 
 
 from pprint import pprint
@@ -143,14 +147,17 @@ class Eagle(object) :
         Currently there is very little error handling ( if any at all )
     """
     def __init__(self, **kwargs):
+
         self.debug = kwargs.get("debug", 0)
 
         if self.debug :
             print self.__class__.__name__, __name__
+        self.checkfw = kwargs.get("checkfirmware", True)
         self.addr = kwargs.get("addr", os.getenv('EAGLE_ADDR', None))
         self.port = kwargs.get("port", os.getenv('EAGLE_PORT', 5002))
-        self.getmac = kwargs.get("getmac", True)
+        self.mac = kwargs.get("mac", None)
         self.timeout = kwargs.get("timeout", 10)
+
         self.soc = None
         self.macid = None
 
@@ -159,8 +166,12 @@ class Eagle(object) :
             print "timeout :  = ", self.timeout
             print "debug :  = ", self.debug
 
+
+	if self.addr is None :
+	    raise AssertionError("no hostname or IP given")
+
         # preload
-        if self.getmac :
+        if self.mac is None :
             self.device_info = self.list_devices()
             if self.device_info is None :
                 raise IOError("Error connecting")
@@ -171,11 +182,25 @@ class Eagle(object) :
             if self.debug :
                 print "Init DeviceMacId = ", self.macid
 
+        if self.checkfw :
+	    mysetting = self.get_setting_data()
+	    dev_fw_ver = mysetting['device_fw_version']
+	    if ( LooseVersion(dev_fw_ver) < LooseVersion(min_fw_ver) ) :
+		warn_message = "Warning : device firmware " \
+			+ "{0} < {1} please concideer " \
+			+ "updating ".format(dev_fw_ver, min_fw_ver)
+		warn( warn_message, RuntimeWarning, stacklevel=3)
+
 
 
 # socket commands as class functions
 
     def list_devices(self):
+        """
+	    Send the LIST_DEVICES command
+	    returns information about the EAGLE device
+
+        """
         comm_responce = self._send_soc_comm("list_devices")
         if self.debug :
             print "comm_responce =", comm_responce
@@ -195,6 +220,8 @@ class Eagle(object) :
         comm_responce = self._send_soc_comm("get_device_data", MacId=macid)
         if comm_responce is None:
             raise RainEagleResponseError("get_device_data : Null reply")
+        if self.debug :
+	    print comm_responce
         etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
@@ -332,6 +359,15 @@ class Eagle(object) :
 
 # http commands as class functions
 
+    def get_device_list(self) :
+        """
+	    Send the LIST_DEVICES command
+	    returns information about the EAGLE device
+
+        """
+        comm_responce = self._send_http_comm("get_device_list")
+        return json.loads(comm_responce)
+
     def get_uploaders(self) :
         """
             gets list of uploaders for Web UI
@@ -346,7 +382,7 @@ class Eagle(object) :
         comm_responce = self._send_http_comm("get_uploaders")
         return json.loads(comm_responce)
 
-    def get_uploader() :
+    def get_uploader(self) :
         """
             gets current uploaders config
 
@@ -432,7 +468,7 @@ class Eagle(object) :
         return json.loads(comm_responce)
 
 
-    def get_historical_data_alt(self, period="day") :
+    def get_historical_data(self, period="day") :
         """
             get a series of summation values over an interval of time
             ( http command api )
@@ -473,7 +509,7 @@ class Eagle(object) :
 
         """
         if period not in ['day', 'week', 'month', 'year'] :
-            raise ValueError("get_historical_data_alt period must be one of day|week|month|year")
+            raise ValueError("get_historical_data : period must be one of day|week|month|year")
         comm_responce = self._send_http_comm("get_historical_data", Period=period)
         return json.loads(comm_responce)
 
@@ -542,7 +578,7 @@ class Eagle(object) :
         return json.loads(comm_responce)
 
     def get_remote_management(self) :
-        return get_device_config(self)
+        return self.get_device_config(self)
 
     def set_remote_management(self, macid=None, status="on") :
         """ set_remote_management
@@ -738,7 +774,8 @@ class Eagle(object) :
 
     def _send_http_comm(self, cmd, **kwargs):
 
-        print "\n\n_send_http_comm : ", cmd
+	if self.debug :
+	    print "\n\n_send_http_comm : ", cmd
 
         commstr = "<LocalCommand>\n"
         commstr += "<Name>{0!s}</Name>\n".format(cmd)
@@ -747,7 +784,8 @@ class Eagle(object) :
             commstr += "<{0}>{1!s}</{0}>\n".format(k, v)
         commstr += "</LocalCommand>\n"
 
-        print(commstr)
+	if self.debug :
+	    print(commstr)
 
         url = "http://{0}/cgi-bin/cgi_manager".format(self.addr)
 
