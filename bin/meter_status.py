@@ -48,7 +48,11 @@ def create_parser():
 def main() :
 
     parser = create_parser()
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
+
+    print "Args = ", args, vars(args)
+    print "unknown = ", unknown
+    exit(0)
 
     eg = Eagle(**vars(args))
     # timeout=45,

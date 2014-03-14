@@ -35,13 +35,11 @@ def print_data(eg) :
     for dat in rh['HistoryData']['CurrentSummation'] :
         print_currentsummation(dat)
 
-    print "# day_delta_received={0:0.4f}\t" \
-        + " day_delta_delivered={1:0.4f} : {2:0.4f}".format(
+    print "# day_delta_received={0:0.4f}\tday_delta_delivered={1:0.4f} : {2:0.4f}".format(
             day_delta_received,
             day_delta_delivered,
             (day_delta_delivered - day_delta_received))
-    print "# max_delta_received={0:0.4f}\t" \
-        + " max_delta_delivered={1:0.4f}".format(
+    print "# max_delta_received={0:0.4f}\tmax_delta_delivered={1:0.4f}".format(
             max_delta_received, max_delta_delivered)
 
 
@@ -87,10 +85,9 @@ def print_currentsummation(cs) :
     time_struct = time.localtime(time_stamp)
     if curr_day != time_struct.tm_mday :
         curr_day = time_struct.tm_mday
-        print "# day_delta_received={0:0.4f}\tday_delta_delivered={1:0.4f}" \
-            + ": {2:0.4f}".format(day_delta_received,
-                                day_delta_delivered,
-                                (day_delta_delivered - day_delta_received))
+        print "# day_delta_received={0:0.4f}".format(day_delta_received) \
+	    + "\tday_delta_delivered={0:0.4f}".format(day_delta_delivered) \
+	    + " : {0:0.4f}".format((day_delta_delivered - day_delta_received))
         day_delta_received = 0
         day_delta_delivered = 0
 
