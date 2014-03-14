@@ -7,9 +7,7 @@ FILE
     RainEagle/EagleClass.py
 
 CLASSES
-    __builtin__.object
         Eagle
-    exceptions.RuntimeError(exceptions.StandardError)
         RainEagleResponseError
     
     class Eagle(__builtin__.object)
@@ -20,6 +18,7 @@ CLASSES
      |      addr        address of device
      |      port        port on device (default 5002)
      |      getmac      connect to device at start up and get macid (default true)
+     |      timeout     TCP socket timeout
      |  
      |  Currently there is very little error handling ( if any at all )
      |  
@@ -54,6 +53,10 @@ CLASSES
      |  get_device_data(self, macid=None)
      |      Send the GET_DEVICE_DATA command to get a data dump
      |  
+     |  get_device_list(self)
+     |      Send the LIST_DEVICES command
+     |      returns information about the EAGLE device
+     |  
      |  get_fast_poll_status(self, macid=None)
      |      Send the GET_FAST_POLL_STATUS command
      |      get the current status of fast poll mode.
@@ -78,35 +81,35 @@ CLASSES
      |          period          day|week|month|year
      |      
      |      On Success returns dict with the values (example):
-     |          'data_period'            'day',
-     |          'data_size'              '14',
-     |          'timestamp[0]'           '1394422200',
-     |          'timestamp[1]'           '1394425800',
-     |          'timestamp[2]'           '1394429400',
-     |          'timestamp[3]'           '1394433000',
-     |          'timestamp[4]'           '1394436600',
-     |          'timestamp[5]'           '1394440200',
-     |          'timestamp[6]'           '1394443800',
-     |          'timestamp[7]'           '1394447400',
-     |          'timestamp[8]'           '1394451000',
-     |          'timestamp[9]'           '1394454600',
-     |          'timestamp[10]'          '1394458200',
-     |          'timestamp[11]'          '1394461800',
-     |          'timestamp[12]'          '1394465400',
-     |          'timestamp[13]'          '1394469000',
-     |          'value[0]'               '0.429',
-     |          'value[1]'               '0.426',
-     |          'value[2]'               '0.422',
-     |          'value[3]'               '0.627',
-     |          'value[4]'               '0.735',
-     |          'value[5]'               '0.193',
-     |          'value[6]'               '0.026',
-     |          'value[7]'               '-0.985',
-     |          'value[8]'               '-1.491',
-     |          'value[9]'               '-2.196'}
-     |          'value[11]'              '-1.868',
-     |          'value[12]'              '-1.330',
-     |          'value[13]'              '-0.870',
+     |          'data_period'            'day'
+     |          'data_size'              '14'
+     |          'timestamp[0]'           '1394422200'
+     |          'timestamp[1]'           '1394425800'
+     |          'timestamp[2]'           '1394429400'
+     |          'timestamp[3]'           '1394433000'
+     |          'timestamp[4]'           '1394436600'
+     |          'timestamp[5]'           '1394440200'
+     |          'timestamp[6]'           '1394443800'
+     |          'timestamp[7]'           '1394447400'
+     |          'timestamp[8]'           '1394451000'
+     |          'timestamp[9]'           '1394454600'
+     |          'timestamp[10]'          '1394458200'
+     |          'timestamp[11]'          '1394461800'
+     |          'timestamp[12]'          '1394465400'
+     |          'timestamp[13]'          '1394469000'
+     |          'value[0]'               '0.429'
+     |          'value[1]'               '0.426'
+     |          'value[2]'               '0.422'
+     |          'value[3]'               '0.627'
+     |          'value[4]'               '0.735'
+     |          'value[5]'               '0.193'
+     |          'value[6]'               '0.026'
+     |          'value[7]'               '-0.985'
+     |          'value[8]'               '-1.491'
+     |          'value[9]'               '-2.196'
+     |          'value[11]'              '-1.868'
+     |          'value[12]'              '-1.330'
+     |          'value[13]'              '-0.870'
      |  
      |  get_history_data(self, macid=None, starttime='0x00000000', endtime=None, frequency=None)
      |      Send the GET_HISTORY_DATA command
@@ -142,10 +145,10 @@ CLASSES
      |      get price for kWh
      |      
      |      On Success returns (example):
-     |          price':         '0.1300',
+     |          price':         '0.1300'
      |          price_label':   'Set by User' or '--'
-     |          price_timestamp': '1394524458',
-     |          price_units':   '$'}
+     |          price_timestamp': '1394524458'
+     |          price_units':   '$'
      |      
      |      returns empty dict on Error
      |  
@@ -154,7 +157,8 @@ CLASSES
      |  get_setting_data(self)
      |      get settings data
      |      
-     |      returns empty dict on Error
+     |      On Success returns dict with value containing setting
+     |      relating to price, uploader, network & device
      |  
      |  get_summation_values(self, macid=None, interval='day')
      |      Send the GET_SUMMATION_VALUES command
@@ -168,20 +172,20 @@ CLASSES
      |      get time source for device
      |      
      |      On Success returns dict with value 'internet' or 'meter' :
-     |         'time_source':           'internet'}
+     |         'time_source':           'internet'
      |  
      |  get_timezone(self)
      |      get current timezone configuration
      |      
      |      On Success returns dict with the value :
      |         'timezone_localTime':    '1394527011'
-     |         'timezone_olsonName':    'UTC/GMT',
+     |         'timezone_olsonName':    'UTC/GMT'
      |         'timezone_status':       '2'
      |         'timezone_utcOffset':    'UTC'
      |         'timezone_utcTime':      '1394527011'
      |         'timezone_status':       'success'
      |  
-     |  get_uploader()
+     |  get_uploader(self)
      |      gets current uploaders config
      |      
      |      On Success returns dict with the values (example):
@@ -209,8 +213,32 @@ CLASSES
      |          'uploader_name[1]':     'Bidgely Inc.'
      |  
      |  get_usage_data(self)
+     |      Get current demand usage summation
+     |      
+     |      On Success returns dict with the values (example):
+     |          'demand' :               '0.4980'
+     |          'demand_timestamp' :     '1394505386'
+     |          'demand_units' :         'kW'
+     |          'message_confirm_required' :     'N'
+     |          'message_confirmed' :    'N'
+     |          'message_id' :           '0'
+     |          'message_priority' :     ''
+     |          'message_queue' :        active'
+     |          'message_read' :         'Y'
+     |          'message_text' :         ''
+     |          'message_timestamp' :    '946684800'
+     |          'meter_status' :         'Connected'
+     |          'price' :                '0.1400'
+     |          'price_label' :          'Set by User'
+     |          'price_units' :          '$'
+     |          'summation_delivered' :  '2667.867'
+     |          'summation_received' :   '37.283'
+     |          'summation_units' :      'kWh'
+     |          'usage_timestamp' :      '1394505386'
      |  
      |  list_devices(self)
+     |      Send the LIST_DEVICES command
+     |      returns information about the EAGLE device
      |  
      |  set_cloud(self, url, authcode='', email='')
      |      set cloud Url
@@ -273,18 +301,36 @@ CLASSES
      |      On Error returns dict with value :
      |          'set_time_source_status':       'invalid source name'
      |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
     
     class RainEagleResponseError(exceptions.RuntimeError)
      |  General exception for responce errors
      |  from Rainforest Automation EAGLE (RFA-Z109)
      |  
+     |  Method resolution order:
+     |      RainEagleResponseError
+     |      exceptions.RuntimeError
+     |      exceptions.StandardError
+     |      exceptions.Exception
+     |      exceptions.BaseException
+     |      __builtin__.object
      |  
-
 DATA
     __all__ = ['Eagle', 'RainEagleResponseError', 'to_epoch_1970, to_epoch...
     __author__ = 'Peter Shipley <peter.shipley@gmail.com>'
     __copyright__ = 'Copyright (C) 2014 Peter Shipley'
     __license__ = 'BSD'
+    __version__ = '0.1.7'
+
+VERSION
+    0.1.7
 
 AUTHOR
     Peter Shipley <peter.shipley@gmail.com>
