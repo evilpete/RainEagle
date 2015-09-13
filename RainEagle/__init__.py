@@ -8,7 +8,7 @@ if sys.hexversion < 0x20703f0 :
     sys.stderr.write("You need python 2.7 or later to run this script\n")
 
 __revision__ = "$Id: 20140301 $"
-__version__ = '0.1.20140301'
+__version__ = "0.1.8"
 __author__ = 'Peter Shipley <peter.shipley@gmail.com>'
 __copyright__ = "Copyright (C) 2014 Peter Shipley"
 __license__ = "BSD"
