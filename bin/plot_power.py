@@ -31,6 +31,10 @@ def main(eg) :
 def print_data(eg) :
     rh = eg.get_history_data()
     #+ # endtime=None, frequency=None) :
+    global curr_day
+
+
+    curr_day = time.gmtime(1);
 
     for dat in rh['HistoryData']['CurrentSummation'] :
         print_currentsummation(dat)
@@ -83,11 +87,13 @@ def print_currentsummation(cs) :
         #print "\t\tnew max_delta_delivered :", max_delta_delivered
 
     time_struct = time.localtime(time_stamp)
-    if curr_day != time_struct.tm_mday :
-        curr_day = time_struct.tm_mday
-        print "# day_delta_received={0:0.4f}".format(day_delta_received) \
-	    + "\tday_delta_delivered={0:0.4f}".format(day_delta_delivered) \
-	    + " : {0:0.4f}".format((day_delta_delivered - day_delta_received))
+    if curr_day.tm_mday != time_struct.tm_mday :
+        curr_day = time_struct
+        print "# {0} day_delta_received={1:0.4f}".format( \
+                    time.strftime("%a %Y-%m-%d", curr_day),
+                    day_delta_received) \
+            + "\tday_delta_delivered={0:0.4f}".format(day_delta_delivered) \
+            + " : {0:0.4f}".format((day_delta_delivered - day_delta_received))
         day_delta_received = 0
         day_delta_delivered = 0
 

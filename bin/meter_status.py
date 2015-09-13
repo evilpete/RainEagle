@@ -50,9 +50,8 @@ def main() :
     parser = create_parser()
     args, unknown = parser.parse_known_args()
 
-    print "Args = ", args, vars(args)
-    print "unknown = ", unknown
-    exit(0)
+    # print "Args = ", args, vars(args)
+    # print "unknown = ", unknown
 
     eg = Eagle(**vars(args))
     # timeout=45,
@@ -94,9 +93,9 @@ def print_currentsummation(cs) :
     if 'TimeStamp' in cs :
         time_stamp = to_epoch_1970(cs['TimeStamp'])
         print "{0:s} : ".format(time.asctime(time.localtime(time_stamp)))
-    print "\tReceived  = {0:{width}.3f} Kw".format(reading_received, width=10)
-    print "\tDelivered = {0:{width}.3f} Kw".format(reading_delivered, width=10)
-    print "\t\t{0:{width}.3f} Kw".format( (reading_delivered - reading_received), width=14)
+    print "\tReceived  = {0:10.3f} Kw".format(reading_received)
+    print "\tDelivered = {0:10.3f} Kw".format(reading_delivered)
+    print "\tMeter     = {0:10.3f} Kw".format( (reading_delivered - reading_received))
 
 
 def print_instantdemand(idemand) :
@@ -124,8 +123,8 @@ def print_instantdemand(idemand) :
         time_stamp = to_epoch_1970(idemand['TimeStamp'])
         print "{0:s} : ".format(time.asctime(time.localtime(time_stamp)))
 
-    print "\tDemand    = {0:{width}.3f} Kw".format(reading, width=10)
-    print "\tAmps      = {0:{width}.3f}".format( ((reading * 1000) / 240), width=10)
+    print "\tDemand    = {0:10.3f} Kw".format(reading)
+    print "\tAmps      = {0:10.3f}".format( ((reading * 1000) / 240))
 
 
 #

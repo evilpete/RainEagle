@@ -167,8 +167,8 @@ class Eagle(object) :
             print "debug :  = ", self.debug
 
 
-	if self.addr is None :
-	    raise AssertionError("no hostname or IP given")
+        if self.addr is None :
+            raise AssertionError("no hostname or IP given")
 
         # preload
         if self.mac is None :
@@ -183,13 +183,13 @@ class Eagle(object) :
                 print "Init DeviceMacId = ", self.macid
 
         if self.checkfw :
-	    mysetting = self.get_setting_data()
-	    dev_fw_ver = mysetting['device_fw_version']
-	    if ( LooseVersion(dev_fw_ver) < LooseVersion(min_fw_ver) ) :
-		warn_message = "Warning : device firmware " \
-			+ "{0} < {1} please concideer " \
-			+ "updating ".format(dev_fw_ver, min_fw_ver)
-		warn( warn_message, RuntimeWarning, stacklevel=3)
+            mysetting = self.get_setting_data()
+            dev_fw_ver = mysetting['device_fw_version']
+            if ( LooseVersion(dev_fw_ver) < LooseVersion(min_fw_ver) ) :
+                warn_message = "Warning : device firmware " \
+                        + "{0} < {1} please concideer " \
+                        + "updating ".format(dev_fw_ver, min_fw_ver)
+                warn( warn_message, RuntimeWarning, stacklevel=3)
 
 
 
@@ -197,8 +197,8 @@ class Eagle(object) :
 
     def list_devices(self, macid=None):
         """
-	    Send the LIST_DEVICES command
-	    returns information about the EAGLE device
+            Send the LIST_DEVICES command
+            returns information about the EAGLE device
 
         """
         comm_responce = self._send_soc_comm("list_devices", MacId=macid)
@@ -221,7 +221,7 @@ class Eagle(object) :
         if comm_responce is None:
             raise RainEagleResponseError("get_device_data : Null reply")
         if self.debug :
-	    print comm_responce
+            print comm_responce
         etree = ET.fromstring('<S>' + comm_responce + '</S>')
         rv = _et2d(etree)
         return rv
@@ -331,6 +331,7 @@ class Eagle(object) :
         return rv
 
     # 17
+    # needs to be rewritten to stream the data via iter
     def get_history_data(self, macid=None, starttime="0x00000000", endtime=None, frequency=None) :
         """ Send the GET_HISTORY_DATA command
             get a series of summation values over an interval of time
@@ -361,8 +362,8 @@ class Eagle(object) :
 
     def get_device_list(self, macid=None) :
         """
-	    Send the LIST_DEVICES command
-	    returns information about the EAGLE device
+            Send the LIST_DEVICES command
+            returns information about the EAGLE device
 
         """
         comm_responce = self._send_http_comm("get_device_list", MacId=macid)
@@ -419,7 +420,7 @@ class Eagle(object) :
         """
         id = _tohex(id)
         comm_responce = self._send_http_comm("confirm_message",
-		MacId=macid, Id=id)
+                MacId=macid, Id=id)
         return json.loads(comm_responce)
 
     def get_message(self, macid=None) :
@@ -595,7 +596,7 @@ class Eagle(object) :
         if status not in ['on', 'off'] :
             raise ValueError("set_remote_management status must be 'on' or 'off'")
         comm_responce = self._send_http_comm("set_remote_management",
-		    MacId=macid, Status=status)
+                    MacId=macid, Status=status)
         return json.loads(comm_responce)
 
 
@@ -615,7 +616,7 @@ class Eagle(object) :
         if source not in ['meter', 'internet'] :
             raise ValueError("set_time_source Source must be 'meter' or 'internet'")
         comm_responce = self._send_http_comm("set_time_source",
-		    MacId=macid, Source=source)
+                    MacId=macid, Source=source)
         return json.loads(comm_responce)
 
     def get_price(self, macid=None) :
@@ -674,7 +675,7 @@ class Eagle(object) :
                 'set_price_status':     'success'
         """
         comm_responce = self._send_http_comm("set_price",
-		    MacId=macid,
+                    MacId=macid,
                     Price="0xFFFFFFFF",
                     TrailingDigits="0x00")
         return json.loads(comm_responce)
@@ -724,7 +725,7 @@ class Eagle(object) :
 
             See also get_uploader() to retrieve current uploader cloud config
         """
-	if url is None :
+        if url is None :
             raise ValueError("invalid url.\n")
 
         if url.__len__() > 200 :
@@ -781,8 +782,8 @@ class Eagle(object) :
 
     def _send_http_comm(self, cmd, **kwargs):
 
-	if self.debug :
-	    print "\n\n_send_http_comm : ", cmd
+        if self.debug :
+            print "\n\n_send_http_comm : ", cmd
 
         commstr = "<LocalCommand>\n"
         commstr += "<Name>{0!s}</Name>\n".format(cmd)
@@ -791,8 +792,12 @@ class Eagle(object) :
             commstr += "<{0}>{1!s}</{0}>\n".format(k, v)
         commstr += "</LocalCommand>\n"
 
-	if self.debug :
-	    print(commstr)
+        if cmd == "set_cloud" :
+            print(commstr)
+            return dict()
+
+        if self.debug :
+            print(commstr)
 
         url = "http://{0}/cgi-bin/cgi_manager".format(self.addr)
 
