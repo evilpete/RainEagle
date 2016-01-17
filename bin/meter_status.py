@@ -35,9 +35,15 @@ def create_parser():
 
     parser.add_argument("-m", "--mac", dest="mac",
                     help="Eagle radio mac addrress")
+    
+    parser.add_argument("-s", "--password", dest="password",
+                    help="Password for HTTP Authorization")
 
     parser.add_argument("-t", "--timeout", dest="timeout",
                     help="Socket timeout")
+    
+    parser.add_argument("-u", "--username", dest="username",
+                    help="Username for HTTP Authorization")
 
     parser.add_argument("-v", '--version', action='version',
                     version="%(prog)s {0}".format(__version__) )
