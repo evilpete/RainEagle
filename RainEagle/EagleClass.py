@@ -11,6 +11,7 @@ import time
 import xml.etree.ElementTree as ET
 import urllib
 import urllib2
+import base64
 from math import floor
 from urlparse import urlparse
 import json
@@ -142,12 +143,17 @@ class Eagle(object) :
             addr        address of device
             port        port on device (default 5002)
             getmac      connect to device at start up and get macid (default true)
+            password    Password for HTTP Authentication
+            username    Username for HTTP Authentication
             timeout     TCP socket timeout
 
         Currently there is very little error handling ( if any at all )
     """
     def __init__(self, **kwargs):
 
+        self.username = kwargs.get("username", 0)
+        self.password = kwargs.get("password", 0)
+        
         self.debug = kwargs.get("debug", 0)
 
         if self.debug :
@@ -801,7 +807,12 @@ class Eagle(object) :
 
         url = "http://{0}/cgi-bin/cgi_manager".format(self.addr)
 
-        req = urllib2.Request(url, commstr)
+        if self.username is not None :
+            if self.debug :
+                print("Authorization string: "+base64.64encode(self.username+":"+self.password)"+\n")
+            req = urllib2.Request(url, commstr, headers={ "Authorization" : 'Basic'+base64.b64encode(self.username+":"+self.password) })
+        else :
+            req = urllib2.Request(url, commstr)
         response = urllib2.urlopen(req)
         the_page = response.read()
 
