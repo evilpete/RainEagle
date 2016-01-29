@@ -1,6 +1,11 @@
+#import time
 import socket
 import sys
 import os
+import xml.etree.ElementTree as ET
+
+
+from pprint import pprint
 
 class Eagle_soc(object) :
     def __init__(self, **kwargs):
