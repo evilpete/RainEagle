@@ -19,7 +19,7 @@ class install_scripts_and_symlinks(install_scripts):
 
 setup(
     name='RainEagle',
-    version='0.1.7a',
+    version='0.1.8',
     author='Peter Shipley',
     author_email='Peter.Shipley@gmail.com',
     packages=find_packages(),
@@ -30,7 +30,7 @@ setup(
     url='https://github.com/evilpete/RainEagle',
     license='BSD',
     description='Python Class for utilizing the Rainforest Automation Eagle ( RFA-Z109 ) socket API.',
-    download_url='https://github.com/evilpete/RainEagle/archive/0.1.7a.tar.gz',
+    download_url='https://github.com/evilpete/RainEagle/archive/0.1.8.tar.gz',
     long_description=open('README.txt').read(),
     cmdclass = { 'install_scripts': install_scripts_and_symlinks }
 )

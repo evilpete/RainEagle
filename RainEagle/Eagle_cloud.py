@@ -27,7 +27,6 @@ class Eagle_cloud(object) :
 
         self.macid = kwargs.get("mac", None)
 
-
         self.cloudemail = kwargs.get("username", os.getenv('EAGLE_EMAIL', None))
         self.cloudid = kwargs.get("cloudid", os.getenv('EAGLE_CLOUDID', None))
         self.cloudpass = kwargs.get("cloudpass", os.getenv('EAGLE_CLOUDPASS', None))

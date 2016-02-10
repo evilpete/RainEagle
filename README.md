@@ -2,8 +2,9 @@
 
 Python Class for utilizing the Rainforest Automation Eagle ( RFA-Z109 ) socket API
 
+This is the DEV BRANCH it may not work ( pull requests welcome )
 
-version = "0.1.7"
+version = "0.1.8"
 
 Example :
 
