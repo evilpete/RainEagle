@@ -141,6 +141,45 @@ class Eagle_cgi(object) :
         comm_responce = self._send_http_comm("get_message", MacId=macid)
         return json.loads(comm_responce)
 
+    def get_raw_data(self, macid=None, datatype="demand", period="day") :
+	"""
+
+            args:
+                datatype            demand|summation
+                period          day|week|month|year
+
+            On Success returns CSV data
+	"""
+	fpath = self._call_cgi("get_raw_data", macid=macid, Type=datatype, Period=period)
+	if "raw_data_status" in fpath and fpath['raw_data_status'] == 'success' :
+	    print "raw_data_status :", fpath['raw_data_status'] 
+	    if "raw_data_filename" in fpath :
+		req_headers=dict()
+		print "raw_data_filename :", fpath['raw_data_filename'] 
+
+		url = "http://{0}/csv/{1}".format(self.addr, fpath['raw_data_filename'])
+
+		bauth = base64.b64encode( "{0}:{1}".format(self.cloudid, self.icode))
+		req_headers["Authorization"] =  "Basic {0}".format(bauth)
+
+		print "_send_http_comm: ", url, req_headers
+
+		req = urllib2.Request(url, headers=req_headers)
+
+		response = urllib2.urlopen(req, timeout=10)
+		the_page = response.read()
+
+		print "the_page = ", the_page
+
+
+	    else :
+		print "raw_data_filename NO ", fpath['raw_data_filename'] 
+
+	else :
+	    print "raw_data_status : no success", fpath
+
+
+
     def get_usage_data(self, macid=None) :
         """
             Get current demand usage summation
@@ -518,8 +557,9 @@ class Eagle_cgi(object) :
 	    req_headers["Authorization"] =  "Basic {0}".format(bauth)
 
 	if self.debug :
-	    #print "_send_http_comm: ", url, req_headers
+	    print "_send_http_comm: ", url, req_headers
 	    pass
+
 	req = urllib2.Request(url, commstr, headers=req_headers)
         response = urllib2.urlopen(req, timeout=10)
 	# print response.info()
