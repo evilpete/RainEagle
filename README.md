@@ -11,7 +11,7 @@ Example :
     import RainEagle
 
     raineagle = RainEagle.Eagle( debug=0 , addr="10.1.1.39")
-    ret_data = eg.list_devices()
+    ret_data = raineagle.list_devices()
 
     print "device MacID = ", ret_data['DeviceInfo']['DeviceMacId']
 ```

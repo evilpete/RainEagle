@@ -809,8 +809,8 @@ class Eagle(object) :
 
         if self.username is not None :
             if self.debug :
-                print("Authorization string: "+base64.64encode(self.username+":"+self.password)"+\n")
-            req = urllib2.Request(url, commstr, headers={ "Authorization" : 'Basic'+base64.b64encode(self.username+":"+self.password) })
+                print("Authorization string: "+ base64.b64encode(self.username+":"+self.password))
+            req = urllib2.Request(url, commstr, headers={ "Authorization" : 'Basic ' + base64.b64encode(self.username+":"+self.password) })
         else :
             req = urllib2.Request(url, commstr)
         response = urllib2.urlopen(req)
