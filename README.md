@@ -111,6 +111,29 @@ API Call list :
 API Calls return dictionarys containing data results,
 raises exception or returns None if error
 
+## Config
+
+```~/.config/eagle/config
+    [DEFAULT] 
+    icode = f555555f5555552f
+    cloudid = 000666
+ 
+    [cgi]  
+    mac = 0xd8e6c90000001555
+    addr = 10.0.0.39
+    debug = 1  
+  
+    [cloud]
+    username = user.name@example.com
+    cloudpass = mypassword
+```
+
+also optionaly uses the environment vars
+
+    EAGLE_ADDR EAGLE_ICODE EAGLE_EMAIL EAGLE_CLOUDID EAGLE_CLOUDPASS
+
+
+
 ## External Documentation
 
 * Developer Portal http://rainforestautomation.com/developer

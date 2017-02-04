@@ -5,25 +5,67 @@ import urllib
 import urllib2
 import base64
 import json
+from RainEagle.Eagle_util import _get_config
+
+#from six.moves import configparser
 
 from pprint import pprint
 
 __all__ = ['Eagle_cgi']
 
+
+
+#def _get_config(config_path=None, opt=None):
+#    if not config_path:
+#        config_path = os.path.sep.join(('~', '.config', 'eagle', 'config'))
+# 
+#    defaults = {}
+#    config_file = os.path.expanduser(config_path)
+#    print "config_file", config_file
+#    if os.path.exists(config_file):
+#        config = configparser.SafeConfigParser()
+#        config.read([config_file])
+#	defaults.update(dict(config.defaults()))
+#        if config.has_section('eagle'):
+#            defaults.update(dict(config.items('eagle')))
+#        if opt is not None and config.has_section(opt):
+#		defaults.update(dict(config.items('cgi')))
+# 
+#    return defaults
+
+
 class Eagle_cgi(object) :
 
     def __init__(self, **kwargs):
 
-        self.macid = kwargs.get("mac", None)
+	config = _get_config(opt="cgi")
+	pprint(config)
 
-        self.debug = kwargs.get("debug", 0)
+        self.macid = kwargs.get("mac",
+		    config.get("mac", None)
+		)
 
-        self.addr = kwargs.get("addr", os.getenv('EAGLE_ADDR', None))
-	self.cloudid = kwargs.get("cloudid", os.getenv('EAGLE_CLOUDID', None))
-	self.icode = kwargs.get("icode", os.getenv('EAGLE_ICODE', None))
+        self.debug = kwargs.get("debug", 
+		    config.get("debug", None)
+		)
+
+        self.addr = kwargs.get("addr",
+		    os.getenv('EAGLE_ADDR',
+		    config.get("addr", None)
+		))
+
+	self.cloudid = kwargs.get("cloudid",
+		    os.getenv('EAGLE_CLOUDID',
+		    config.get("cloudid", None)
+		))
+
+	self.icode = kwargs.get("icode",
+		    os.getenv('EAGLE_ICODE',
+		    config.get("icode", None)
+		))
 
         if self.addr is None :
-	    if self.cloudid is None :
+	    if self.cloudid is not None :
 		self.addr = "eagle-{0}.local".format(self.cloudid)
 	    else:
 		raise AssertionError("no hostname or IP given")

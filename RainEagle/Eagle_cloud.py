@@ -5,6 +5,7 @@ import urllib
 import urllib2
 #iimport base64
 import json
+from RainEagle.Eagle_util import _get_config
 
 from pprint import pprint
 
@@ -19,17 +20,37 @@ class Eagle_cloud(object) :
         self.debug = kwargs.get("debug", 0)
 	self.network_info = None
 
+	config = _get_config(opt="cloud")
+	pprint(config)
 
-        self.cloud_url = "https://rainforestcloud.com:9445/cgi-bin/post_manager"
+        self.cloud_url = config.get("url", "https://rainforestcloud.com:9445/cgi-bin/post_manager")
+
         #self.cloud_url = "https://10.1.1.39/cgi-bin/post_manager"
 
-	self.icode = kwargs.get("icode", os.getenv('EAGLE_ICODE', None))
+	self.icode = kwargs.get("icode",
+		    os.getenv('EAGLE_ICODE',
+		    config.get("icode", None)
+		))
 
-        self.macid = kwargs.get("mac", None)
+        self.macid = kwargs.get("mac",
+		    config.get("mac", None)
+		)
 
-        self.cloudemail = kwargs.get("username", os.getenv('EAGLE_EMAIL', None))
-        self.cloudid = kwargs.get("cloudid", os.getenv('EAGLE_CLOUDID', None))
-        self.cloudpass = kwargs.get("cloudpass", os.getenv('EAGLE_CLOUDPASS', None))
+        self.cloudemail = kwargs.get("username",
+		    os.getenv('EAGLE_EMAIL',
+		    config.get("username", None)
+		))
+
+	self.cloudid = kwargs.get("cloudid",
+		    os.getenv('EAGLE_CLOUDID',
+		    config.get("cloudid", None)
+		))
+
+        self.cloudpass = kwargs.get("cloudpass",
+		    os.getenv('EAGLE_CLOUDPASS',
+		    config.get("cloudpass", None)
+		))
+
 
         # preload
         if self.macid is None:

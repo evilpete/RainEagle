@@ -1,10 +1,13 @@
+
+import os
 import time
 import xml.etree.ElementTree as ET
 import urllib
 import urllib2
 # import base64
+from six.moves import configparser
 
-__all__ = ['to_epoch_2000', 'to_epoch_1970', '_tohex', '_twos_comp', '_et2d']
+__all__ = ['to_epoch_2000', 'to_epoch_1970', '_tohex', '_twos_comp', '_et2d', '_get_config']
 
 def to_epoch_2000(t) :
     """ converts time stored as
@@ -103,6 +106,23 @@ def _tohex(n, width=8) :
     return  "{:#0{width}x}".format(int(i), width=width)
 
 
+def _get_config(config_path=None, opt=None):
+    if not config_path:
+        config_path = os.path.sep.join(('~', '.config', 'eagle', 'config'))
+ 
+    defaults = {}
+    config_file = os.path.expanduser(config_path)
+    print "config_file", config_file
+    if os.path.exists(config_file):
+        config = configparser.SafeConfigParser()
+        config.read([config_file])
+	defaults.update(dict(config.defaults()))
+        if config.has_section('eagle'):
+            defaults.update(dict(config.items('eagle')))
+        if opt is not None and config.has_section(opt):
+		defaults.update(dict(config.items(opt)))
+ 
+    return defaults
 #
 
 
