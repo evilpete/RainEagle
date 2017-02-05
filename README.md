@@ -113,7 +113,9 @@ raises exception or returns None if error
 
 ## Config
 
-```~/.config/eagle/config
+~/.config/eagle/config
+
+```
     [DEFAULT] 
     icode = f555555f5555552f
     cloudid = 000666

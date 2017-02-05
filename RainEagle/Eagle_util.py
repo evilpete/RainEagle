@@ -105,6 +105,34 @@ def _tohex(n, width=8) :
 
     return  "{:#0{width}x}".format(int(i), width=width)
 
+def _save_config(config_path=None, opt=None, **kwargs ):
+
+    if not config_path:
+        config_path = os.path.sep.join(('~', '.config', 'eagle', 'config'))
+
+    if opt is None:
+	print "opt is None"
+	return
+
+    config_file = os.path.expanduser(config_path)
+
+    config = configparser.SafeConfigParser()
+
+    config.read(["eagle.cfg", config_file])
+
+    config.add_section(opt)
+    if 'mac' in kwargs:
+	config.set(opt, 'mac', kwargs['mac'])
+
+    if 'icode' in kwargs:
+	config.set(opt, 'icode', kwargs['icode'])
+
+    with open('eagle.cfg', 'wb') as configfile:
+	print "write cfg" 
+	config.write(configfile)
+
+
+
 
 def _get_config(config_path=None, opt=None):
     if not config_path:
@@ -121,6 +149,9 @@ def _get_config(config_path=None, opt=None):
             defaults.update(dict(config.items('eagle')))
         if opt is not None and config.has_section(opt):
 		defaults.update(dict(config.items(opt)))
+        if 'cloudid' in defaults:
+	    if config.has_section(defaults['cloudid']):
+		defaults.update(dict(config.items(defaults['cloudid'])))
  
     return defaults
 #

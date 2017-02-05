@@ -5,7 +5,7 @@ import urllib
 import urllib2
 #iimport base64
 import json
-from RainEagle.Eagle_util import _get_config
+from RainEagle.Eagle_util import _get_config, _save_config
 
 from pprint import pprint
 
@@ -62,6 +62,8 @@ class Eagle_cloud(object) :
             self.icode = self.getinstallcode()
             if self.debug :
                 print "Init Cloud DeviceMacId = ", self.macid
+
+	# _save_config(opt=self.cloudid, mac=self.macid, icode=self.icode)
 
     def getmacid(self):
 	if self.macid is not None :
