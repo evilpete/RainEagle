@@ -1,7 +1,12 @@
 # Python class for Rainforest Eagle
 
-Python Class for utilizing the Rainforest Automation Eagle ( RFA-Z109 ) socket API
+**Inactive / Archived Repo**
 
+**Device EOL / Abandoned by Manufacture**
+
+---
+
+Python Class for utilizing the Rainforest Automation Eagle ( RFA-Z109 ) socket API
 
 version = "0.1.7"
 
